@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSMS - Faculty Node</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body class="bg-[#0b0f19] text-slate-100 min-h-screen font-sans cyber-grid flex flex-col justify-between">
+
+    <nav class="glass-panel border-b border-slate-800/80 px-6 py-4 flex justify-between items-center">
+        <h1 class="text-lg font-black tracking-widest text-emerald-400 uppercase">👩‍🏫 Faculty Profile Pipeline</h1>
+        <a href="index.html" class="text-xs font-mono border border-slate-700 hover:border-indigo-500 bg-slate-900/50 px-4 py-2 rounded-xl transition">&larr; ESCAPE</a>
+    </nav>
+
+    <main class="container mx-auto my-auto px-4 py-12 max-w-2xl">
+        <div class="glass-panel p-8 rounded-3xl neon-glow-emerald">
+            <div class="mb-6 border-b border-slate-800 pb-3">
+                <h2 class="text-base font-bold text-slate-200 uppercase">📝 Register New Faculty Record</h2>
+                <p class="text-[10px] font-mono text-slate-500 mt-0.5">TARGET DATA KEY: PUBLIC.TEACHERS</p>
+            </div>
+            
+            <form id="teacherRegistrationForm" class="space-y-5">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input type="text" id="tFirstName" required placeholder="First Name" class="w-full bg-slate-900/40 border border-slate-800 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none">
+                    <input type="text" id="tLastName" required placeholder="Last Name" class="w-full bg-slate-900/40 border border-slate-800 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none">
+                </div>
+                <input type="email" id="teacherEmail" required placeholder="Staff Email Address" class="w-full bg-slate-900/40 border border-slate-800 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none">
+                <input type="tel" id="teacherPhone" required placeholder="Phone Identity" class="w-full bg-slate-900/40 border border-slate-800 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none">
+                <input type="date" id="hireDate" required class="w-full bg-slate-900/40 border border-slate-800 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-slate-400 focus:outline-none">
+
+                <button type="submit" class="w-full bg-gradient-to-r from-emerald-600 to-emerald-400 text-white font-mono font-bold text-xs tracking-widest py-4 rounded-xl transition duration-500 uppercase cursor-pointer">🚀 Commit Faculty Entry</button>
+            </form>
+            <div id="teacherFeedback" class="hidden mt-4 p-3 rounded-xl text-center text-xs font-mono"></div>
+        </div>
+    </main>
+
+    <script src="assets/js/teacher.js"></script>
+</body>
+</html>
