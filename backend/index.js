@@ -1,109 +1,114 @@
 const express = require('express');
-const { Pool } = require('pg');
 const cors = require('cors');
+const { Pool } = require('pg');
 require('dotenv').config();
 
 const app = express();
 app.use(express.json());
-app.use(cors()); // Global CORS bypass taake frontend components hit kar sakein
+app.use(cors());
 
-// Neon Serverless Connection Pool
+// Neon PostgreSQL connection
 const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false }
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false }
 });
 
-// Default Root Diagnostics
-app.get('/', (req, res) => {
-    res.json({ status: "Online", message: "Core Intel Network Engine Connected." });
-});
+// HTTP + WebSocket server
+const server = require('http').createServer(app);
+const { Server } = require('socket.io');
+const io = new Server(server, { cors: { origin: "*" } });
 
-// 📊 1. DYNAMIC ANALYTICS ROUTE (For Dashboard Charts)
-app.get('/api/v1/analytics/dashboard', async (req, res) => {
-    try {
-        const financeRes = await pool.query(`
-            SELECT status, 
-                   COUNT(*)::int as invoice_count, 
-                   COALESCE(SUM(total_amount), 0)::float as total_amount 
-            FROM STUDENT_INVOICES 
-            GROUP BY status;
-        `);
+// Middleware
+const errorHandler = require('./middleware/errorHandler');
+const authMiddleware = require('./middleware/auth');
 
-        const classRes = await pool.query(`
-            SELECT c.class_name, COUNT(e.student_id)::int as total_students 
-            FROM ENROLLMENTS e 
-            JOIN CLASSES c ON e.class_id = c.class_id 
-            WHERE e.status = 'Active' 
-            GROUP BY c.class_name;
-        `);
+// Routes
+const studentRoutes = require('./routes/students');
+const teacherRoutes = require('./routes/teachers');
+const classRoutes = require('./routes/classes');
+const invoiceRoutes = require('./routes/invoices');
+const analyticsRoutes = require('./routes/analytics');
 
-        res.json({
-            status: "success",
-            data: {
-                finance_analytics: financeRes.rows,
-                class_analytics: classRes.rows
-            }
-        });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ status: "error", message: err.message });
-    }
-});
+// Mount routes
+app.use('/api/v1/students', studentRoutes);
+app.use('/api/v1/teachers', teacherRoutes);
+app.use('/api/v1/classes', classRoutes);
+app.use('/api/v1/invoices', invoiceRoutes);
+app.use('/api/v1/analytics', analyticsRoutes);
 
-// 🎒 2. DROP-DOWN ROUTE (Fetch Classes for Admission Form Mapping)
-app.get('/api/v1/classes', async (req, res) => {
-    try {
-        const result = await pool.query("SELECT class_id, class_name, room_number FROM CLASSES ORDER BY class_name;");
-        res.json({ status: "success", data: result.rows });
-    } catch (err) {
-        res.status(500).json({ status: "error", message: err.message });
-    }
-});
+// Error handler middleware
+app.use(errorHandler);
 
-// 📝 3. INGESTION ROUTE: REGISTER STUDENT
-app.post('/api/v1/students', async (req, res) => {
-    const { first_name, last_name, email, phone, class_id } = req.body;
-    try {
-        const result = await pool.query(
-            `INSERT INTO STUDENTS (first_name, last_name, email, phone, class_id) 
-             VALUES ($1, $2, $3, $4, $5) RETURNING student_id;`,
-            [first_name, last_name, email, phone, class_id]
-        );
-        res.json({ status: "success", data: { student_id: result.rows[0].student_id } });
-    } catch (err) {
-        res.status(500).json({ status: "error", message: err.message });
-    }
-});
+// Emit dashboard updates
+async function emitDashboardUpdate() {
+  try {
+    const financeRes = await pool.query(`
+      SELECT status, COUNT(*)::int AS invoice_count, 
+             COALESCE(SUM(total_amount),0)::float AS total_amount
+      FROM STUDENT_INVOICES
+      GROUP BY status;
+    `);
 
-// 👩‍🏫 4. INGESTION ROUTE: REGISTER FACULTY
-app.post('/api/v1/teachers', async (req, res) => {
-    const { first_name, last_name, email, phone, hire_date } = req.body;
-    try {
-        const result = await pool.query(
-            `INSERT INTO TEACHERS (first_name, last_name, email, phone, hire_date) 
-             VALUES ($1, $2, $3, $4, $5) RETURNING teacher_id;`,
-            [first_name, last_name, email, phone, hire_date]
-        );
-        res.json({ status: "success", data: { teacher_id: result.rows[0].teacher_id } });
-    } catch (err) {
-        res.status(500).json({ status: "error", message: err.message });
-    }
-});
+    const classRes = await pool.query(`
+      SELECT c.class_name, COUNT(e.student_id)::int AS total_students
+      FROM ENROLLMENTS e
+      JOIN CLASSES c ON e.class_id = c.class_id
+      WHERE e.status = 'Active'
+      GROUP BY c.class_name;
+    `);
 
-// 💰 5. INGESTION ROUTE: GENERATE FEE INVOICE
+    const teacherRes = await pool.query(`
+      SELECT subject, COUNT(*)::int AS count
+      FROM TEACHERS
+      GROUP BY subject;
+    `);
+
+    const attendanceRes = await pool.query(`
+      SELECT date, 
+             COUNT(CASE WHEN status='Present' THEN 1 END)::int AS present,
+             COUNT(CASE WHEN status='Absent' THEN 1 END)::int AS absent
+      FROM ATTENDANCE
+      WHERE date >= CURRENT_DATE - INTERVAL '7 days'
+      GROUP BY date
+      ORDER BY date ASC;
+    `);
+
+    const gradesRes = await pool.query(`
+      SELECT subject, ROUND(AVG(marks),2)::float AS average
+      FROM GRADES
+      GROUP BY subject;
+    `);
+
+    io.emit("dashboard_update", {
+      finance_analytics: financeRes.rows,
+      class_analytics: classRes.rows,
+      teacher_analytics: teacherRes.rows,
+      attendance_analytics: attendanceRes.rows,
+      grades_analytics: gradesRes.rows
+    });
+  } catch (err) {
+    console.error("Emit error:", err);
+  }
+}
+
+// Example: trigger emit after invoice creation
 app.post('/api/v1/invoices', async (req, res) => {
-    const { student_id, amount, due_date, status } = req.body;
-    try {
-        const result = await pool.query(
-            `INSERT INTO STUDENT_INVOICES (student_id, total_amount, due_date, status) 
-             VALUES ($1, $2, $3, $4, $5) RETURNING invoice_id;`,
-            [student_id, amount, due_date, status]
-        );
-        res.json({ status: "success", data: { invoice_id: result.rows[0].invoice_id } });
-    } catch (err) {
-        res.status(500).json({ status: "error", message: err.message });
-    }
+  const { student_id, amount, due_date, status } = req.body;
+  try {
+    const result = await pool.query(
+      `INSERT INTO STUDENT_INVOICES (student_id, total_amount, due_date, status) 
+       VALUES ($1, $2, $3, $4) RETURNING invoice_id;`,
+      [student_id, amount, due_date, status]
+    );
+    res.json({ status: "success", data: { invoice_id: result.rows[0].invoice_id } });
+    emitDashboardUpdate(); // push update to dashboard
+  } catch (err) {
+    res.status(500).json({ status: "error", message: err.message });
+  }
 });
 
-const PORT = 8000;
-app.listen(PORT, () => console.log(`🚀 Node.js Core Network Active on Port ${PORT}`));
+// Server start
+const PORT = process.env.PORT || 8000;
+server.listen(PORT, () => {
+  console.log(`🚀 Backend running on port ${PORT}`);
+});

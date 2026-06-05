@@ -1,0 +1,70 @@
+/* Cyberpunk Dashboard Styling */
+.cyber-grid {
+  background-color: #0b0f19;
+  background-image: linear-gradient(rgba(99, 102, 241, 0.03) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(99, 102, 241, 0.03) 1px, transparent 1px);
+  background-size: 35px 35px;
+}
+
+.glass-panel {
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.glass-panel:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 0 40px rgba(99, 102, 241, 0.25);
+}
+
+.neon-glow-indigo { box-shadow: 0 0 30px rgba(99, 102, 241, 0.12); }
+.neon-glow-emerald { box-shadow: 0 0 30px rgba(16, 185, 129, 0.12); }
+.neon-glow-cyan { box-shadow: 0 0 30px rgba(6, 182, 212, 0.12); }
+
+.panel-title {
+  font-size: 0.85rem;
+  font-family: monospace;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: #cbd5e1;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+  padding-bottom: 0.5rem;
+  letter-spacing: 0.1em;
+}
+
+canvas {
+  width: 100% !important;
+  height: 320px !important;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #0b0f19; }
+::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: #6366f1; }
+
+/* Utility classes */
+.text-gradient {
+  background: linear-gradient(to right, #6366f1, #06b6d4, #10b981);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.btn-cyber {
+  background: linear-gradient(to right, #6366f1, #06b6d4);
+  color: #fff;
+  font-family: monospace;
+  font-weight: bold;
+  text-transform: uppercase;
+  padding: 0.75rem 1.25rem;
+  border-radius: 0.75rem;
+  transition: all 0.3s ease;
+}
+
+.btn-cyber:hover {
+  background: linear-gradient(to right, #06b6d4, #10b981);
+  transform: scale(1.05);
+}
