@@ -1,4 +1,38 @@
 const API_BASE = "http://127.0.0.1:8000/api/v1";
+let authToken = null;
+
+// Login
+document.getElementById("adminLoginForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const username = document.getElementById("adminUsername").value;
+  const password = document.getElementById("adminPassword").value;
+
+  const res = await fetch(`${API_BASE}/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password })
+  });
+  const data = await res.json();
+  if (data.status === "success") {
+    authToken = data.token;
+    alert("Login successful!");
+    loadAdminData();
+  } else {
+    alert("Login failed: " + data.message);
+  }
+});
+
+// Utility: API request with JWT
+async function apiRequest(url, options = {}) {
+  return fetch(url, {
+    ...options,
+    headers: {
+      "Authorization": `Bearer ${authToken}`,
+      "Content-Type": "application/json",
+      ...(options.headers || {})
+    }
+  });
+}
 
 // Utility: render list items with edit/delete buttons
 function renderList(containerId, items, formatter) {
@@ -13,7 +47,7 @@ function renderList(containerId, items, formatter) {
 async function loadAdminData() {
   try {
     // Students
-    const studentsRes = await fetch(`${API_BASE}/students`);
+    const studentsRes = await apiRequest(`${API_BASE}/students`);
     const studentsData = await studentsRes.json();
     if (studentsData.status === "success") {
       renderList("studentList", studentsData.data, s =>
@@ -25,7 +59,7 @@ async function loadAdminData() {
     }
 
     // Teachers
-    const teachersRes = await fetch(`${API_BASE}/teachers`);
+    const teachersRes = await apiRequest(`${API_BASE}/teachers`);
     const teachersData = await teachersRes.json();
     if (teachersData.status === "success") {
       renderList("teacherList", teachersData.data, t =>
@@ -37,19 +71,19 @@ async function loadAdminData() {
     }
 
     // Invoices
-    const invoicesRes = await fetch(`${API_BASE}/invoices`);
+    const invoicesRes = await apiRequest(`${API_BASE}/invoices`);
     const invoicesData = await invoicesRes.json();
     if (invoicesData.status === "success") {
       renderList("invoiceList", invoicesData.data, inv =>
         `<p>ID ${inv.invoice_id}: Student ${inv.student_id}, PKR ${inv.total_amount}, Status: ${inv.status}
-          <button onclick="deleteInvoice(${inv.invoice_id})" class="btn-cyber">Delete</button>
+                    <button onclick="deleteInvoice(${inv.invoice_id})" class="btn-cyber">Delete</button>
           <button onclick="editInvoice(${inv.invoice_id})" class="btn-cyber">Edit</button>
         </p>`
       );
     }
 
     // Classes
-    const classesRes = await fetch(`${API_BASE}/classes`);
+    const classesRes = await apiRequest(`${API_BASE}/classes`);
     const classesData = await classesRes.json();
     if (classesData.status === "success") {
       renderList("classList", classesData.data, c =>
@@ -66,7 +100,7 @@ async function loadAdminData() {
 
 // CRUD Handlers
 async function deleteStudent(id) {
-  await fetch(`${API_BASE}/students/${id}`, { method: "DELETE" });
+  await apiRequest(`${API_BASE}/students/${id}`, { method: "DELETE" });
   await loadAdminData();
 }
 async function editStudent(id) {
@@ -74,8 +108,8 @@ async function editStudent(id) {
   const newEmail = prompt("Enter new student email:");
   if (newName && newEmail) {
     const [first_name, last_name] = newName.split(" ");
-    await fetch(`${API_BASE}/students/${id}`, {
-      method: "PUT", headers: { "Content-Type": "application/json" },
+    await apiRequest(`${API_BASE}/students/${id}`, {
+      method: "PUT",
       body: JSON.stringify({ first_name, last_name, email: newEmail, phone: "0000000000", class_id: 1 })
     });
     await loadAdminData();
@@ -83,7 +117,7 @@ async function editStudent(id) {
 }
 
 async function deleteTeacher(id) {
-  await fetch(`${API_BASE}/teachers/${id}`, { method: "DELETE" });
+  await apiRequest(`${API_BASE}/teachers/${id}`, { method: "DELETE" });
   await loadAdminData();
 }
 async function editTeacher(id) {
@@ -91,8 +125,8 @@ async function editTeacher(id) {
   const newEmail = prompt("Enter new teacher email:");
   if (newName && newEmail) {
     const [first_name, last_name] = newName.split(" ");
-    await fetch(`${API_BASE}/teachers/${id}`, {
-      method: "PUT", headers: { "Content-Type": "application/json" },
+    await apiRequest(`${API_BASE}/teachers/${id}`, {
+      method: "PUT",
       body: JSON.stringify({ first_name, last_name, email: newEmail, phone: "0000000000", hire_date: new Date().toISOString().split("T")[0], subject: "General" })
     });
     await loadAdminData();
@@ -100,15 +134,15 @@ async function editTeacher(id) {
 }
 
 async function deleteInvoice(id) {
-  await fetch(`${API_BASE}/invoices/${id}`, { method: "DELETE" });
+  await apiRequest(`${API_BASE}/invoices/${id}`, { method: "DELETE" });
   await loadAdminData();
 }
 async function editInvoice(id) {
   const newAmount = prompt("Enter new invoice amount:");
   const newStatus = prompt("Enter new status (Pending/Paid):");
   if (newAmount && newStatus) {
-    await fetch(`${API_BASE}/invoices/${id}`, {
-      method: "PUT", headers: { "Content-Type": "application/json" },
+    await apiRequest(`${API_BASE}/invoices/${id}`, {
+      method: "PUT",
       body: JSON.stringify({ total_amount: newAmount, due_date: new Date().toISOString().split("T")[0], status: newStatus })
     });
     await loadAdminData();
@@ -116,20 +150,22 @@ async function editInvoice(id) {
 }
 
 async function deleteClass(id) {
-  await fetch(`${API_BASE}/classes/${id}`, { method: "DELETE" });
+  await apiRequest(`${API_BASE}/classes/${id}`, { method: "DELETE" });
   await loadAdminData();
 }
 async function editClass(id) {
   const newName = prompt("Enter new class name:");
   const newRoom = prompt("Enter new room number:");
   if (newName && newRoom) {
-    await fetch(`${API_BASE}/classes/${id}`, {
-      method: "PUT", headers: { "Content-Type": "application/json" },
+    await apiRequest(`${API_BASE}/classes/${id}`, {
+      method: "PUT",
       body: JSON.stringify({ class_name: newName, room_number: newRoom })
     });
     await loadAdminData();
   }
 }
 
-// Initialize
-document.addEventListener("DOMContentLoaded", loadAdminData);
+// Initialize after login
+document.addEventListener("DOMContentLoaded", () => {
+  console.log("Admin.js loaded. Please login first.");
+});
