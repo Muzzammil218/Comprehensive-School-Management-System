@@ -1,20 +1,18 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const pool = require('../config/db');
-const emitDashboardUpdate = require('../utils/realtime'); // no curly braces
+const pool = require("../config/db");
+const emitDashboardUpdate = require("../utils/realtime");
 
 // Create invoice
-router.post('/', async (req, res) => {
-  const { student_id, total_amount, due_date, status } = req.body;
+router.post("/", async (req, res) => {
+  const { student_id, amount, status, due_date } = req.body;
   try {
     const result = await pool.query(
-      `INSERT INTO STUDENT_INVOICES (student_id,total_amount,due_date,status)
-       VALUES ($1,$2,$3,$4) RETURNING invoice_id;`,
-      [student_id, total_amount, due_date, status]
+      `INSERT INTO INVOICES (student_id, amount, status, due_date)
+       VALUES ($1, $2, $3, $4) RETURNING *;`,
+      [student_id, amount, status, due_date]
     );
     res.json({ status: "success", data: result.rows[0] });
-
-    // push update to dashboard
     emitDashboardUpdate(req.io);
   } catch (err) {
     res.status(500).json({ status: "error", message: err.message });
@@ -22,9 +20,9 @@ router.post('/', async (req, res) => {
 });
 
 // Read all invoices
-router.get('/', async (req, res) => {
+router.get("/", async (req, res) => {
   try {
-    const result = await pool.query(`SELECT * FROM STUDENT_INVOICES;`);
+    const result = await pool.query(`SELECT * FROM INVOICES;`);
     res.json({ status: "success", data: result.rows });
   } catch (err) {
     res.status(500).json({ status: "error", message: err.message });
@@ -32,16 +30,17 @@ router.get('/', async (req, res) => {
 });
 
 // Update invoice
-router.put('/:id', async (req, res) => {
+router.put("/:id", async (req, res) => {
   const { id } = req.params;
-  const { total_amount, due_date, status } = req.body;
+  const { student_id, amount, status, due_date } = req.body;
   try {
     await pool.query(
-      `UPDATE STUDENT_INVOICES SET total_amount=$1,due_date=$2,status=$3 WHERE invoice_id=$4;`,
-      [total_amount, due_date, status, id]
+      `UPDATE INVOICES 
+       SET student_id=$1, amount=$2, status=$3, due_date=$4 
+       WHERE invoice_id=$5;`,
+      [student_id, amount, status, due_date, id]
     );
     res.json({ status: "success" });
-
     emitDashboardUpdate(req.io);
   } catch (err) {
     res.status(500).json({ status: "error", message: err.message });
@@ -49,11 +48,10 @@ router.put('/:id', async (req, res) => {
 });
 
 // Delete invoice
-router.delete('/:id', async (req, res) => {
+router.delete("/:id", async (req, res) => {
   try {
-    await pool.query(`DELETE FROM STUDENT_INVOICES WHERE invoice_id=$1;`, [req.params.id]);
+    await pool.query(`DELETE FROM INVOICES WHERE invoice_id=$1;`, [req.params.id]);
     res.json({ status: "success" });
-
     emitDashboardUpdate(req.io);
   } catch (err) {
     res.status(500).json({ status: "error", message: err.message });

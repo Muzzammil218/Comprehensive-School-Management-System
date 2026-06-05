@@ -1,0 +1,125 @@
+/* ===== Global Reset ===== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
+  background-color: #0a0a0a;
+  color: #f5f5f5;
+  line-height: 1.6;
+}
+
+/* ===== Layout ===== */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+/* ===== Typography ===== */
+h1, h2, h3, h4 {
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+p {
+  opacity: 0.85;
+}
+
+/* ===== Buttons ===== */
+button {
+  background: linear-gradient(90deg, #ff00ff, #00ffff);
+  color: #fff;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 12px #ff00ff, 0 0 24px #00ffff;
+}
+
+/* ===== Cards ===== */
+.card {
+  background: #111827;
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 0 10px rgba(255, 0, 255, 0.4),
+              0 0 20px rgba(0, 255, 255, 0.4);
+  transition: transform 0.2s ease;
+}
+
+.card:hover {
+  transform: scale(1.02);
+}
+
+/* ===== Neon Effects ===== */
+.neon-text {
+  text-shadow: 0 0 5px #ff00ff,
+               0 0 10px #00ffff,
+               0 0 20px #ff00ff;
+}
+
+.neon-border {
+  border: 2px solid transparent;
+  border-image: linear-gradient(45deg, #ff00ff, #00ffff) 1;
+  box-shadow: 0 0 10px #ff00ff, 0 0 20px #00ffff;
+}
+
+/* ===== Forms ===== */
+input, select, textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 6px;
+  border: 1px solid #333;
+  background: #1f2937;
+  color: #f5f5f5;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: #00ffff;
+  box-shadow: 0 0 8px #00ffff;
+  outline: none;
+}
+
+/* ===== Navigation ===== */
+nav {
+  background: #111827;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 0 10px #ff00ff, 0 0 20px #00ffff;
+}
+
+nav a {
+  color: #f5f5f5;
+  text-decoration: none;
+  margin: 0 1rem;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+nav a:hover {
+  color: #00ffff;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+  nav {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

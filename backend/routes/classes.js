@@ -1,23 +1,26 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const pool = require('../config/db');
+const pool = require("../config/db");
+const emitDashboardUpdate = require("../utils/realtime");
 
 // Create class
-router.post('/', async (req, res) => {
+router.post("/", async (req, res) => {
   const { class_name, room_number } = req.body;
   try {
     const result = await pool.query(
-      `INSERT INTO CLASSES (class_name, room_number) VALUES ($1,$2) RETURNING class_id;`,
+      `INSERT INTO CLASSES (class_name, room_number)
+       VALUES ($1, $2) RETURNING *;`,
       [class_name, room_number]
     );
     res.json({ status: "success", data: result.rows[0] });
+    emitDashboardUpdate(req.io);
   } catch (err) {
     res.status(500).json({ status: "error", message: err.message });
   }
 });
 
 // Read all classes
-router.get('/', async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     const result = await pool.query(`SELECT * FROM CLASSES;`);
     res.json({ status: "success", data: result.rows });
@@ -27,7 +30,7 @@ router.get('/', async (req, res) => {
 });
 
 // Update class
-router.put('/:id', async (req, res) => {
+router.put("/:id", async (req, res) => {
   const { id } = req.params;
   const { class_name, room_number } = req.body;
   try {
@@ -36,16 +39,18 @@ router.put('/:id', async (req, res) => {
       [class_name, room_number, id]
     );
     res.json({ status: "success" });
+    emitDashboardUpdate(req.io);
   } catch (err) {
     res.status(500).json({ status: "error", message: err.message });
   }
 });
 
 // Delete class
-router.delete('/:id', async (req, res) => {
+router.delete("/:id", async (req, res) => {
   try {
     await pool.query(`DELETE FROM CLASSES WHERE class_id=$1;`, [req.params.id]);
     res.json({ status: "success" });
+    emitDashboardUpdate(req.io);
   } catch (err) {
     res.status(500).json({ status: "error", message: err.message });
   }

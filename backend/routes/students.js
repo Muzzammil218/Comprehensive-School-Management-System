@@ -8,8 +8,8 @@ router.post("/", async (req, res) => {
   const { first_name, last_name, email, contact_number, class_id } = req.body;
   try {
     const result = await pool.query(
-      `INSERT INTO STUDENTS (first_name,last_name,email,contact_number,class_id)
-       VALUES ($1,$2,$3,$4,$5) RETURNING *;`,
+      `INSERT INTO STUDENTS (first_name, last_name, email, contact_number, class_id)
+       VALUES ($1, $2, $3, $4, $5) RETURNING *;`,
       [first_name, last_name, email, contact_number, class_id]
     );
     res.json({ status: "success", data: result.rows[0] });
@@ -35,7 +35,7 @@ router.put("/:id", async (req, res) => {
   const { first_name, last_name, email, contact_number, class_id } = req.body;
   try {
     await pool.query(
-      `UPDATE STUDENTS SET first_name=$1,last_name=$2,email=$3,contact_number=$4,class_id=$5 WHERE student_id=$6;`,
+      `UPDATE STUDENTS SET first_name=$1, last_name=$2, email=$3, contact_number=$4, class_id=$5 WHERE student_id=$6;`,
       [first_name, last_name, email, contact_number, class_id, id]
     );
     res.json({ status: "success" });

@@ -1,31 +1,65 @@
-const API_POST_TEACHER = "http://127.0.0.1:8000/api/v1/teachers";
+const express = require("express");
+const router = express.Router();
+const pool = require("../config/db");
+const emitDashboardUpdate = require("../utils/realtime");
 
-async function handleTeacherSubmit(e) {
-    e.preventDefault();
-    const feedback = document.getElementById("teacherFeedback");
-    const data = {
-        first_name: document.getElementById("tFirstName").value.trim(),
-        last_name: document.getElementById("tLastName").value.trim(),
-        email: document.getElementById("teacherEmail").value.trim(),
-        phone: document.getElementById("teacherPhone").value.trim(),
-        hire_date: document.getElementById("hireDate").value
-    };
+// Create teacher
+router.post("/", async (req, res) => {
+  const { first_name, last_name, email, phone, hire_date, subject } = req.body;
+  try {
+    const result = await pool.query(
+      `INSERT INTO TEACHERS (first_name, last_name, email, phone, hire_date, subject)
+       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *;`,
+      [first_name, last_name, email, phone, hire_date, subject]
+    );
+    res.json({ status: "success", data: result.rows[0] });
 
-    try {
-        const res = await fetch(API_POST_TEACHER, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data)
-        });
-        const result = await res.json();
-        if (res.ok && result.status === "success") {
-            feedback.className = "mt-4 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 block";
-            feedback.textContent = `🎉 Faculty Ingestion Successful. Staff ID: ${result.data.teacher_id}`;
-            document.getElementById("teacherRegistrationForm").reset();
-        }
-    } catch (err) {
-        feedback.className = "mt-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 block";
-        feedback.textContent = "❌ Network Fault: Node Connection Refused.";
-    }
-}
-document.addEventListener("DOMContentLoaded", () => { document.getElementById("teacherRegistrationForm").addEventListener("submit", handleTeacherSubmit); });
+    // Push update to dashboard
+    emitDashboardUpdate(req.io);
+  } catch (err) {
+    res.status(500).json({ status: "error", message: err.message });
+  }
+});
+
+// Read all teachers
+router.get("/", async (req, res) => {
+  try {
+    const result = await pool.query(`SELECT * FROM TEACHERS;`);
+    res.json({ status: "success", data: result.rows });
+  } catch (err) {
+    res.status(500).json({ status: "error", message: err.message });
+  }
+});
+
+// Update teacher
+router.put("/:id", async (req, res) => {
+  const { id } = req.params;
+  const { first_name, last_name, email, phone, hire_date, subject } = req.body;
+  try {
+    await pool.query(
+      `UPDATE TEACHERS 
+       SET first_name=$1, last_name=$2, email=$3, phone=$4, hire_date=$5, subject=$6 
+       WHERE teacher_id=$7;`,
+      [first_name, last_name, email, phone, hire_date, subject, id]
+    );
+    res.json({ status: "success" });
+
+    emitDashboardUpdate(req.io);
+  } catch (err) {
+    res.status(500).json({ status: "error", message: err.message });
+  }
+});
+
+// Delete teacher
+router.delete("/:id", async (req, res) => {
+  try {
+    await pool.query(`DELETE FROM TEACHERS WHERE teacher_id=$1;`, [req.params.id]);
+    res.json({ status: "success" });
+
+    emitDashboardUpdate(req.io);
+  } catch (err) {
+    res.status(500).json({ status: "error", message: err.message });
+  }
+});
+
+module.exports = router;

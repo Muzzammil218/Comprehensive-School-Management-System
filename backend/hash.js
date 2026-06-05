@@ -1,8 +1,15 @@
-// hash.js
-const bcrypt = require('bcrypt');
+const bcrypt = require("bcrypt");
 
-const password = "Admin@123"; // choose your own strong password
+async function generateHash(password) {
+  const hashed = await bcrypt.hash(password, 10);
+  console.log(`Plain: ${password}`);
+  console.log(`Hashed: ${hashed}`);
+}
 
-bcrypt.hash(password, 10).then(hash => {
-  console.log("Hashed password:", hash);
-});
+const input = process.argv[2];
+if (!input) {
+  console.error("⚠️ Please provide a password. Example: node hash.js mypassword");
+  process.exit(1);
+}
+
+generateHash(input);

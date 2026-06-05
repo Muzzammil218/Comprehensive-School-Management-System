@@ -1,50 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CSMS - Intelligence Dashboard</title>
-  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>School Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-  <link rel="stylesheet" href="../assets/css/dashboard.css">
+  <link rel="stylesheet" href="assets/css/global.css" />
 </head>
-<body class="cyber-grid min-h-screen text-slate-100 font-sans">
+<body class="bg-black text-white font-sans">
 
-  <nav class="glass-panel px-6 py-4 flex justify-between items-center">
-    <h1 class="text-xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400 uppercase">
-      ⚡ CSMS Intelligence Dashboard
-    </h1>
-    <a href="index.html" class="text-xs font-mono border border-slate-700 hover:border-indigo-500 bg-slate-900/50 px-4 py-2 rounded-xl transition">&larr; Portal Escape</a>
-  </nav>
+  <!-- Header -->
+  <header class="p-6 bg-gradient-to-r from-purple-800 via-pink-600 to-cyan-500 shadow-lg">
+    <h1 class="text-3xl font-bold neon-text">⚡ Cyberpunk School Dashboard ⚡</h1>
+    <p class="text-sm opacity-80">Realtime analytics powered by Socket.IO</p>
+  </header>
 
-  <main class="container mx-auto my-10 px-4 max-w-7xl grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
-    <div class="glass-panel p-6 rounded-3xl neon-glow-indigo">
-      <h2 class="panel-title">💰 Finance Matrix</h2>
+  <!-- Grid Layout -->
+  <main class="p-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    
+    <!-- Finance -->
+    <section class="bg-gray-900 p-6 rounded-lg shadow-lg neon-border">
+      <h2 class="text-xl font-semibold mb-4">Finance Status</h2>
       <canvas id="feeStatusChart"></canvas>
-    </div>
+    </section>
 
-    <div class="glass-panel p-6 rounded-3xl neon-glow-indigo">
-      <h2 class="panel-title">📊 Enrollment Density</h2>
+    <!-- Students -->
+    <section class="bg-gray-900 p-6 rounded-lg shadow-lg neon-border">
+      <h2 class="text-xl font-semibold mb-4">Students per Class</h2>
       <canvas id="studentDensityChart"></canvas>
-    </div>
+    </section>
 
-    <div class="glass-panel p-6 rounded-3xl neon-glow-emerald">
-      <h2 class="panel-title">👩‍🏫 Teacher Distribution</h2>
+    <!-- Teachers -->
+    <section class="bg-gray-900 p-6 rounded-lg shadow-lg neon-border">
+      <h2 class="text-xl font-semibold mb-4">Teachers by Subject</h2>
       <canvas id="teacherChart"></canvas>
-    </div>
+    </section>
 
-    <div class="glass-panel p-6 rounded-3xl neon-glow-cyan">
-      <h2 class="panel-title">📅 Attendance Stats</h2>
+    <!-- Attendance -->
+    <section class="bg-gray-900 p-6 rounded-lg shadow-lg neon-border md:col-span-2">
+      <h2 class="text-xl font-semibold mb-4">Attendance (Last 7 Days)</h2>
       <canvas id="attendanceChart"></canvas>
-    </div>
+    </section>
 
-    <div class="glass-panel p-6 rounded-3xl neon-glow-indigo">
-      <h2 class="panel-title">📖 Grades Overview</h2>
+    <!-- Grades -->
+    <section class="bg-gray-900 p-6 rounded-lg shadow-lg neon-border md:col-span-3">
+      <h2 class="text-xl font-semibold mb-4">Average Grades per Subject</h2>
       <canvas id="gradesChart"></canvas>
-    </div>
+    </section>
+
   </main>
 
-  <script src="../assets/js/dashboard.js"></script>
+  <!-- JS -->
+  <script src="assets/js/dashboard.js"></script>
 </body>
 </html>

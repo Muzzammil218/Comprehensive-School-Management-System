@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Login</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="assets/css/global.css" />
+</head>
+<body class="bg-black flex items-center justify-center h-screen">
+
+  <!-- Login Card -->
+  <div class="card w-full max-w-md">
+    <h1 class="text-2xl font-bold neon-text text-center mb-6">🔐 Admin Login</h1>
+
+    <!-- Login Form -->
+    <form id="loginForm" class="space-y-4">
+      <div>
+        <label for="username" class="block mb-2 font-semibold">Username</label>
+        <input type="text" id="username" name="username" required />
+      </div>
+      <div>
+        <label for="password" class="block mb-2 font-semibold">Password</label>
+        <input type="password" id="password" name="password" required />
+      </div>
+      <button type="submit" class="w-full">Login</button>
+    </form>
+
+    <!-- Error Message -->
+    <p id="errorMsg" class="text-red-500 mt-4 hidden">Invalid credentials. Try again.</p>
+  </div>
+
+  <!-- External JS -->
+  <script src="assets/js/login.js"></script>
+</body>
+</html>
