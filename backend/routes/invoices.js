@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../config/db');
-const { emitDashboardUpdate } = require('../utils/realtime'); // optional helper
+const emitDashboardUpdate = require('../utils/realtime'); // no curly braces
 
 // Create invoice
 router.post('/', async (req, res) => {
@@ -13,7 +13,9 @@ router.post('/', async (req, res) => {
       [student_id, total_amount, due_date, status]
     );
     res.json({ status: "success", data: result.rows[0] });
-    emitDashboardUpdate(); // push update to dashboard
+
+    // push update to dashboard
+    emitDashboardUpdate(req.io);
   } catch (err) {
     res.status(500).json({ status: "error", message: err.message });
   }
@@ -39,7 +41,8 @@ router.put('/:id', async (req, res) => {
       [total_amount, due_date, status, id]
     );
     res.json({ status: "success" });
-    emitDashboardUpdate();
+
+    emitDashboardUpdate(req.io);
   } catch (err) {
     res.status(500).json({ status: "error", message: err.message });
   }
@@ -50,7 +53,8 @@ router.delete('/:id', async (req, res) => {
   try {
     await pool.query(`DELETE FROM STUDENT_INVOICES WHERE invoice_id=$1;`, [req.params.id]);
     res.json({ status: "success" });
-    emitDashboardUpdate();
+
+    emitDashboardUpdate(req.io);
   } catch (err) {
     res.status(500).json({ status: "error", message: err.message });
   }
