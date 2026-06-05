@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>School Management System</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- TailwindCSS for cyberpunk styling -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/css/global.css">
+</head>
+
+<body class="bg-black text-cyan-300 font-mono flex items-center justify-center h-screen">
+  <!-- Shared nav -->
+  <%- include("components/nav") %>
+
+  <!-- Landing Card -->
+  <div class="bg-gray-900 p-8 rounded shadow-neon text-center w-full max-w-lg">
+    <h1 class="text-3xl mb-6 neon-text">⚡ Cyberpunk School Management</h1>
+    <p class="mb-6">Welcome to the futuristic admin portal. Please login or register to continue.</p>
+
+    <div class="space-x-4">
+      <a href="/login" class="px-4 py-2 bg-cyan-600 hover:bg-cyan-700 rounded">Login</a>
+      <a href="/register" class="px-4 py-2 bg-green-600 hover:bg-green-700 rounded">Register</a>
+    </div>
+  </div>
+
+  <!-- Shared footer -->
+  <%- include("components/footer") %>
+</body>
+</html>

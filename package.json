@@ -2,6 +2,7 @@
   "dependencies": {
     "ejs": "^6.0.1",
     "express": "^5.2.1",
+    "express-ejs-layouts": "^2.5.1",
     "socket.io": "^4.8.3"
   },
   "name": "comprehensive-school-management-system",
