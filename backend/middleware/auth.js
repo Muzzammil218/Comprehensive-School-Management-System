@@ -1,7 +1,7 @@
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
 
 function authMiddleware(req, res, next) {
-  const authHeader = req.headers['authorization'];
+  const authHeader = req.headers["authorization"];
   if (!authHeader) {
     return res.status(403).json({ status: "error", message: "No token provided" });
   }
@@ -11,7 +11,7 @@ function authMiddleware(req, res, next) {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded;
 
-    // Only admins can access protected routes
+    // Example: restrict to admins only
     if (decoded.role !== "admin") {
       return res.status(403).json({ status: "error", message: "Forbidden" });
     }

@@ -1,16 +1,20 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
-const pool = require('../config/db');
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
+const pool = require("../config/db");
 
-// Login route
-router.post('/login', async (req, res) => {
+// POST /api/v1/auth/login
+router.post("/login", async (req, res) => {
   const { username, password } = req.body;
 
   try {
     // Find user by username
-    const result = await pool.query(`SELECT * FROM users WHERE username=$1;`, [username]);
+    const result = await pool.query(
+      `SELECT * FROM users WHERE username=$1;`,
+      [username]
+    );
+
     if (result.rows.length === 0) {
       return res.status(401).json({ status: "error", message: "Invalid credentials" });
     }

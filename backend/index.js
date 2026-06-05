@@ -1,8 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const { Pool } = require('pg');
+const authRoutes = require("./routes/auth");
 require('dotenv').config();
-
 const app = express();
 app.use(express.json());
 app.use(cors());
@@ -29,12 +29,15 @@ const classRoutes = require('./routes/classes');
 const invoiceRoutes = require('./routes/invoices');
 const analyticsRoutes = require('./routes/analytics');
 
+
 // Mount routes
 app.use('/api/v1/students', studentRoutes);
 app.use('/api/v1/teachers', teacherRoutes);
 app.use('/api/v1/classes', classRoutes);
 app.use('/api/v1/invoices', invoiceRoutes);
 app.use('/api/v1/analytics', analyticsRoutes);
+app.use("/api/v1/auth", authRoutes);
+
 
 // Error handler middleware
 app.use(errorHandler);
