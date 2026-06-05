@@ -31,7 +31,7 @@ p {
 }
 
 /* ===== Buttons ===== */
-button {
+button, a.btn {
   background: linear-gradient(90deg, #ff00ff, #00ffff);
   color: #fff;
   border: none;
@@ -42,7 +42,7 @@ button {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-button:hover {
+button:hover, a.btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 0 12px #ff00ff, 0 0 24px #00ffff;
 }
@@ -74,6 +74,12 @@ button:hover {
   box-shadow: 0 0 10px #ff00ff, 0 0 20px #00ffff;
 }
 
+.shadow-neon {
+  box-shadow: 0 0 10px #00ffff,
+              0 0 20px #00ffff,
+              0 0 40px #00ffff;
+}
+
 /* ===== Forms ===== */
 input, select, textarea {
   width: 100%;
@@ -89,6 +95,21 @@ input:focus, select:focus, textarea:focus {
   border-color: #00ffff;
   box-shadow: 0 0 8px #00ffff;
   outline: none;
+}
+
+/* ===== Tables ===== */
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+th, td {
+  padding: 8px;
+  text-align: center;
+}
+thead {
+  background: #111827;
+  text-transform: uppercase;
+  font-weight: bold;
 }
 
 /* ===== Navigation ===== */

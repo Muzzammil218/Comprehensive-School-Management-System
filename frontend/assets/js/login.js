@@ -1,30 +1,27 @@
-const API_BASE = "http://127.0.0.1:8000/api/v1";
+// frontend/assets/js/login.js
+import apiRequest from "./api.js";
 
-document.getElementById("loginForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const username = document.getElementById("username").value;
-  const password = document.getElementById("password").value;
+document.addEventListener("DOMContentLoaded", () => {
+  const loginForm = document.getElementById("loginForm");
 
-  try {
-    const res = await fetch(`${API_BASE}/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password })
+  if (loginForm) {
+    loginForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value.trim();
+
+      try {
+        const res = await apiRequest("/auth/login", "POST", { username, password });
+
+        if (res.token) {
+          localStorage.setItem("token", res.token);
+          alert("✅ Login successful!");
+          window.location.href = "/dashboard.html"; // redirect to dashboard
+        }
+      } catch (err) {
+        alert("❌ Login failed: " + err.message);
+      }
     });
-    const json = await res.json();
-
-    if (json.status === "success") {
-      // Save JWT in localStorage
-      localStorage.setItem("token", json.token);
-      localStorage.setItem("role", json.role);
-
-      // Redirect to dashboard
-      window.location.href = "dashboard.html";
-    } else {
-      document.getElementById("errorMsg").classList.remove("hidden");
-    }
-  } catch (err) {
-    console.error("Login error:", err);
-    document.getElementById("errorMsg").classList.remove("hidden");
   }
 });

@@ -1,58 +1,69 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>School Dashboard</title>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- TailwindCSS for cyberpunk styling -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../assets/css/global.css">
+
+  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Socket.IO client -->
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-  <link rel="stylesheet" href="assets/css/global.css" />
 </head>
-<body class="bg-black text-white font-sans">
 
-  <!-- Header -->
-  <header class="p-6 bg-gradient-to-r from-purple-800 via-pink-600 to-cyan-500 shadow-lg">
-    <h1 class="text-3xl font-bold neon-text">⚡ Cyberpunk School Dashboard ⚡</h1>
-    <p class="text-sm opacity-80">Realtime analytics powered by Socket.IO</p>
-  </header>
+<body class="bg-black text-cyan-300 font-mono">
+  <!-- Include nav -->
+  <%- include('../components/nav') %>
+    <!-- Header -->
+    <header class="p-4 bg-gray-900 border-b border-cyan-400 flex justify-between items-center">
+      <h1 class="text-2xl neon-text">⚡ Cyberpunk School Dashboard</h1>
+      <button id="logoutBtn" class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded">Logout</button>
+    </header>
 
-  <!-- Grid Layout -->
-  <main class="p-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-    
-    <!-- Finance -->
-    <section class="bg-gray-900 p-6 rounded-lg shadow-lg neon-border">
-      <h2 class="text-xl font-semibold mb-4">Finance Status</h2>
-      <canvas id="feeStatusChart"></canvas>
-    </section>
+    <!-- Dashboard Grid -->
+    <main class="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- Finance -->
+      <section class="bg-gray-800 p-4 rounded shadow-neon">
+        <h2 class="text-xl mb-2">Fee Status</h2>
+        <canvas id="feeStatusChart" class="neon-glow"></canvas>
+      </section>
 
-    <!-- Students -->
-    <section class="bg-gray-900 p-6 rounded-lg shadow-lg neon-border">
-      <h2 class="text-xl font-semibold mb-4">Students per Class</h2>
-      <canvas id="studentDensityChart"></canvas>
-    </section>
+      <!-- Students per class -->
+      <section class="bg-gray-800 p-4 rounded shadow-neon">
+        <h2 class="text-xl mb-2">Students per Class</h2>
+        <canvas id="studentDensityChart" class="neon-glow"></canvas>
+      </section>
 
-    <!-- Teachers -->
-    <section class="bg-gray-900 p-6 rounded-lg shadow-lg neon-border">
-      <h2 class="text-xl font-semibold mb-4">Teachers by Subject</h2>
-      <canvas id="teacherChart"></canvas>
-    </section>
+      <!-- Teachers per subject -->
+      <section class="bg-gray-800 p-4 rounded shadow-neon">
+        <h2 class="text-xl mb-2">Teachers per Subject</h2>
+        <canvas id="teacherChart" class="neon-glow"></canvas>
+      </section>
 
-    <!-- Attendance -->
-    <section class="bg-gray-900 p-6 rounded-lg shadow-lg neon-border md:col-span-2">
-      <h2 class="text-xl font-semibold mb-4">Attendance (Last 7 Days)</h2>
-      <canvas id="attendanceChart"></canvas>
-    </section>
+      <!-- Attendance -->
+      <section class="bg-gray-800 p-4 rounded shadow-neon col-span-2">
+        <h2 class="text-xl mb-2">Attendance (Last 7 Days)</h2>
+        <canvas id="attendanceChart" class="neon-glow"></canvas>
+      </section>
 
-    <!-- Grades -->
-    <section class="bg-gray-900 p-6 rounded-lg shadow-lg neon-border md:col-span-3">
-      <h2 class="text-xl font-semibold mb-4">Average Grades per Subject</h2>
-      <canvas id="gradesChart"></canvas>
-    </section>
+      <!-- Grades -->
+      <section class="bg-gray-800 p-4 rounded shadow-neon col-span-2">
+        <h2 class="text-xl mb-2">Average Grades</h2>
+        <canvas id="gradesChart" class="neon-glow"></canvas>
+      </section>
+    </main>
 
-  </main>
-
-  <!-- JS -->
-  <script src="assets/js/dashboard.js"></script>
+    <!-- Scripts -->
+    <script type="module" src="../assets/js/dashboard.js"></script>
+    <script type="module" src="../assets/js/auth.js"></script>
+    <!-- Include footer -->
+    <%- include('../components/footer') %>
 </body>
+
 </html>

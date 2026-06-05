@@ -1,49 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
+    <title>School Management System</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CSMS - Core Matrix Gate</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <link rel="stylesheet" href="assets/css/style.css">
+
+    <!-- TailwindCSS for cyberpunk styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../assets/css/global.css">
 </head>
-<body class="bg-[#0b0f19] text-slate-100 min-h-screen font-sans cyber-grid flex flex-col justify-between">
 
-    <header class="glass-panel border-b border-slate-800/80 px-6 py-5 text-center shadow-2xl">
-        <h1 class="text-2xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-cyan-400 to-emerald-400 uppercase">
-            🏫 Comprehensive School Management System
-        </h1>
-        <p class="text-[10px] font-mono text-slate-500 uppercase tracking-widest mt-1">Enterprise Relational Interface Network</p>
-    </header>
+<body class="bg-black text-cyan-300 font-mono flex items-center justify-center h-screen">
+    <!-- Include nav -->
+    <%- include('../components/nav') %>
 
-    <main class="container mx-auto px-4 max-w-5xl my-auto grid grid-cols-1 md:grid-cols-4 gap-6 py-12">
-        <a href="dashboard.html" class="glass-panel p-6 rounded-2xl hover:border-indigo-500 neon-glow-indigo transition duration-500 group">
-            <div class="text-2xl mb-3 group-hover:scale-110 transition-transform">📊</div>
-            <h2 class="font-mono font-bold text-xs uppercase tracking-wider text-indigo-400">Core Analytics</h2>
-            <p class="text-[11px] text-slate-400 mt-2">Live chart rendering vectors from database pools.</p>
-        </a>
+        <!-- Landing Card -->
+        <div class="bg-gray-900 p-8 rounded shadow-neon text-center w-full max-w-lg">
+            <h1 class="text-3xl mb-6 neon-text">⚡ Cyberpunk School Management</h1>
+            <p class="mb-6">Welcome to the futuristic admin portal. Please login or register to continue.</p>
 
-        <a href="student.html" class="glass-panel p-6 rounded-2xl hover:border-indigo-500 neon-glow-indigo transition duration-500 group">
-            <div class="text-2xl mb-3 group-hover:scale-110 transition-transform">🎒</div>
-            <h2 class="font-mono font-bold text-xs uppercase tracking-wider text-indigo-400">Student Ingestion</h2>
-            <p class="text-[11px] text-slate-400 mt-2">Commit admission and class mapping write-streams.</p>
-        </a>
-
-        <a href="teacher.html" class="glass-panel p-6 rounded-2xl hover:border-emerald-500 neon-glow-emerald transition duration-500 group">
-            <div class="text-2xl mb-3 group-hover:scale-110 transition-transform">👩‍🏫</div>
-            <h2 class="font-mono font-bold text-xs uppercase tracking-wider text-emerald-400">Faculty Influx</h2>
-            <p class="text-[11px] text-slate-400 mt-2">Register staff identifiers to 3NF architecture tables.</p>
-        </a>
-
-        <a href="fee.html" class="glass-panel p-6 rounded-2xl hover:border-cyan-500 neon-glow-cyan transition duration-500 group">
-            <div class="text-2xl mb-3 group-hover:scale-110 transition-transform">💰</div>
-            <h2 class="font-mono font-bold text-xs uppercase tracking-wider text-cyan-400">Ledger Posting</h2>
-            <p class="text-[11px] text-slate-400 mt-2">Generate invoices and monitor payment lifecycles.</p>
-        </a>
-    </main>
-
-    <footer class="text-center py-4 text-[9px] font-mono text-slate-600 tracking-widest uppercase">
-        Node Session Status: Secure // Developer Mode Active
-    </footer>
+            <div class="space-x-4">
+                <a href="login.html" class="px-4 py-2 bg-cyan-600 hover:bg-cyan-700 rounded">Login</a>
+                <a href="register.html" class="px-4 py-2 bg-green-600 hover:bg-green-700 rounded">Register</a>
+            </div>
+        </div>
+        <!-- Include footer -->
+        <%- include('../components/footer') %>
 </body>
+
 </html>

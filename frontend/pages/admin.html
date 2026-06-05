@@ -1,98 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
+  <title>Manage Admins</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CSMS - Admin Control Hub</title>
-  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-  <link rel="stylesheet" href="../assets/css/style.css">
+
+  <!-- TailwindCSS for cyberpunk styling -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../assets/css/global.css">
 </head>
-<body class="cyber-grid min-h-screen text-slate-100 font-sans">
 
-  <!-- Navigation -->
-  <nav class="glass-panel px-6 py-4 flex justify-between items-center">
-    <h1 class="text-xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400 uppercase">
-      🛡️ CSMS Admin Portal
-    </h1>
-    <a href="index.html" class="text-xs font-mono border border-slate-700 hover:border-indigo-500 bg-slate-900/50 px-4 py-2 rounded-xl transition">&larr; Escape</a>
-  </nav>
+<body class="bg-black text-cyan-300 font-mono">
+  <!-- Include nav -->
+  <%- include('../components/nav') %>
+    <!-- Header -->
+    <header class="p-4 bg-gray-900 border-b border-cyan-400 flex justify-between items-center">
+      <h1 class="text-2xl neon-text">🛡️ Admin Management</h1>
+      <a href="dashboard.html" class="px-4 py-2 bg-cyan-600 hover:bg-cyan-700 rounded">Back to Dashboard</a>
+    </header>
 
-  <!-- Login Form -->
-  <section class="glass-panel p-6 rounded-3xl neon-glow-cyan max-w-md mx-auto mt-6">
-    <h2 class="panel-title">🔐 Admin Login</h2>
-    <form id="adminLoginForm" class="space-y-3">
-      <input type="text" id="adminUsername" placeholder="Username" class="w-full cyber-input">
-      <input type="password" id="adminPassword" placeholder="Password" class="w-full cyber-input">
-      <button type="submit" class="btn-cyber w-full">Login</button>
-    </form>
-  </section>
-
-  <!-- Main Grid -->
-  <main class="container mx-auto my-10 px-4 max-w-7xl grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
-
-    <!-- Students CRUD -->
-    <div class="glass-panel p-6 rounded-3xl neon-glow-indigo">
-      <h2 class="panel-title">🎒 Manage Students</h2>
-      <form id="adminStudentForm" class="space-y-3">
-        <input type="text" id="studentName" placeholder="Full Name" class="w-full cyber-input">
-        <input type="email" id="studentEmail" placeholder="Email" class="w-full cyber-input">
-        <button type="submit" class="btn-cyber w-full">Add Student</button>
+    <!-- Admin Form -->
+    <section class="p-6">
+      <h2 class="text-xl mb-4">Add New Admin</h2>
+      <form id="adminForm" class="space-y-4 bg-gray-800 p-4 rounded shadow-neon">
+        <input id="adminUsername" type="text" placeholder="Username"
+          class="w-full p-2 rounded bg-black border border-cyan-400 text-cyan-300" required>
+        <input id="adminPassword" type="password" placeholder="Password"
+          class="w-full p-2 rounded bg-black border border-cyan-400 text-cyan-300" required>
+        <button type="submit" class="px-4 py-2 bg-green-600 hover:bg-green-700 rounded">Add Admin</button>
       </form>
-      <div id="studentList" class="mt-4 text-xs font-mono"></div>
-    </div>
+    </section>
 
-    <!-- Teachers CRUD -->
-    <div class="glass-panel p-6 rounded-3xl neon-glow-emerald">
-      <h2 class="panel-title">👩‍🏫 Manage Teachers</h2>
-      <form id="adminTeacherForm" class="space-y-3">
-        <input type="text" id="teacherName" placeholder="Full Name" class="w-full cyber-input">
-        <input type="email" id="teacherEmail" placeholder="Email" class="w-full cyber-input">
-        <button type="submit" class="btn-cyber w-full">Add Teacher</button>
-      </form>
-      <div id="teacherList" class="mt-4 text-xs font-mono"></div>
-    </div>
+    <!-- Admin Table -->
+    <section class="p-6">
+      <h2 class="text-xl mb-4">Admin Accounts</h2>
+      <table class="w-full border border-cyan-400 text-cyan-300">
+        <thead class="bg-gray-900">
+          <tr>
+            <th class="p-2 border border-cyan-400">ID</th>
+            <th class="p-2 border border-cyan-400">Username</th>
+            <th class="p-2 border border-cyan-400">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="adminTable" class="bg-gray-800">
+          <!-- Rows injected by admin.js -->
+        </tbody>
+      </table>
+    </section>
 
-    <!-- Invoices CRUD -->
-    <div class="glass-panel p-6 rounded-3xl neon-glow-cyan">
-      <h2 class="panel-title">💰 Manage Invoices</h2>
-      <form id="adminInvoiceForm" class="space-y-3">
-        <input type="number" id="invoiceStudentId" placeholder="Student ID" class="w-full cyber-input">
-        <input type="number" step="0.01" id="invoiceAmount" placeholder="Amount PKR" class="w-full cyber-input">
-        <input type="date" id="invoiceDueDate" class="w-full cyber-input">
-        <button type="submit" class="btn-cyber w-full">Generate Invoice</button>
-      </form>
-      <div id="invoiceList" class="mt-4 text-xs font-mono"></div>
-    </div>
-
-    <!-- Classes CRUD -->
-    <div class="glass-panel p-6 rounded-3xl neon-glow-indigo">
-      <h2 class="panel-title">🏫 Manage Classes</h2>
-      <form id="adminClassForm" class="space-y-3">
-        <input type="text" id="className" placeholder="Class Name" class="w-full cyber-input">
-        <input type="text" id="roomNumber" placeholder="Room Number" class="w-full cyber-input">
-        <button type="submit" class="btn-cyber w-full">Add Class</button>
-      </form>
-      <div id="classList" class="mt-4 text-xs font-mono"></div>
-    </div>
-
-    <!-- Real-time Analytics -->
-    <div class="glass-panel p-6 rounded-3xl neon-glow-indigo col-span-full">
-      <h2 class="panel-title">📊 Live Analytics</h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <canvas id="feeStatusChart"></canvas>
-        <canvas id="studentDensityChart"></canvas>
-        <canvas id="teacherChart"></canvas>
-        <canvas id="attendanceChart"></canvas>
-        <canvas id="gradesChart"></canvas>
-      </div>
-    </div>
-
-  </main>
-
-  <!-- Scripts -->
-  <script src="../assets/js/dashboard.js"></script>
-  <script src="../assets/js/admin.js"></script>
+    <!-- Scripts -->
+    <script type="module" src="../assets/js/admin.js"></script>
+    <!-- Include footer -->
+    <%- include('../components/footer') %>
 </body>
+
 </html>

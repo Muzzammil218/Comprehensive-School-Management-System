@@ -1,14 +1,16 @@
-const API_BASE = "http://127.0.0.1:8000/api/v1";
+// frontend/assets/js/api.js
+
+const API_BASE = "http://localhost:8000/api/v1"; // adjust if deployed
 
 /**
- * Generic API request wrapper with JWT support
+ * Generic fetch wrapper with JWT support
  * @param {string} endpoint - API endpoint (e.g. "/students")
  * @param {string} method - HTTP method (GET, POST, PUT, DELETE)
  * @param {object} body - Request body (optional)
  * @returns {Promise<object>} - JSON response
  */
 async function apiRequest(endpoint, method = "GET", body = null) {
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("token"); // JWT stored after login
 
   const options = {
     method,
@@ -22,14 +24,19 @@ async function apiRequest(endpoint, method = "GET", body = null) {
     options.body = JSON.stringify(body);
   }
 
-  const res = await fetch(`${API_BASE}${endpoint}`, options);
+  try {
+    const res = await fetch(`${API_BASE}${endpoint}`, options);
+    const data = await res.json();
 
-  // Handle unauthorized
-  if (res.status === 401) {
-    alert("Session expired. Please log in again.");
-    window.location.href = "login.html";
-    return;
+    if (!res.ok) {
+      throw new Error(data.message || "API request failed");
+    }
+
+    return data;
+  } catch (err) {
+    console.error("❌ API Error:", err.message);
+    throw err;
   }
-
-  return res.json();
 }
+
+export default apiRequest;

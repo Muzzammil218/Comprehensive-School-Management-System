@@ -1,41 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CSMS - Faculty Node</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <link rel="stylesheet" href="assets/css/style.css">
+  <meta charset="UTF-8">
+  <title>Manage Teachers</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- TailwindCSS for cyberpunk styling -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../assets/css/global.css">
 </head>
-<body class="bg-[#0b0f19] text-slate-100 min-h-screen font-sans cyber-grid flex flex-col justify-between">
 
-    <nav class="glass-panel border-b border-slate-800/80 px-6 py-4 flex justify-between items-center">
-        <h1 class="text-lg font-black tracking-widest text-emerald-400 uppercase">👩‍🏫 Faculty Profile Pipeline</h1>
-        <a href="index.html" class="text-xs font-mono border border-slate-700 hover:border-indigo-500 bg-slate-900/50 px-4 py-2 rounded-xl transition">&larr; ESCAPE</a>
-    </nav>
+<body class="bg-black text-cyan-300 font-mono">
+  <!-- Include nav -->
+  <%- include('../components/nav') %>
+    <!-- Header -->
+    <header class="p-4 bg-gray-900 border-b border-cyan-400 flex justify-between items-center">
+      <h1 class="text-2xl neon-text">👩‍🏫 Teacher Management</h1>
+      <a href="dashboard.html" class="px-4 py-2 bg-cyan-600 hover:bg-cyan-700 rounded">Back to Dashboard</a>
+    </header>
 
-    <main class="container mx-auto my-auto px-4 py-12 max-w-2xl">
-        <div class="glass-panel p-8 rounded-3xl neon-glow-emerald">
-            <div class="mb-6 border-b border-slate-800 pb-3">
-                <h2 class="text-base font-bold text-slate-200 uppercase">📝 Register New Faculty Record</h2>
-                <p class="text-[10px] font-mono text-slate-500 mt-0.5">TARGET DATA KEY: PUBLIC.TEACHERS</p>
-            </div>
-            
-            <form id="teacherRegistrationForm" class="space-y-5">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <input type="text" id="tFirstName" required placeholder="First Name" class="w-full bg-slate-900/40 border border-slate-800 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none">
-                    <input type="text" id="tLastName" required placeholder="Last Name" class="w-full bg-slate-900/40 border border-slate-800 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none">
-                </div>
-                <input type="email" id="teacherEmail" required placeholder="Staff Email Address" class="w-full bg-slate-900/40 border border-slate-800 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none">
-                <input type="tel" id="teacherPhone" required placeholder="Phone Identity" class="w-full bg-slate-900/40 border border-slate-800 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none">
-                <input type="date" id="hireDate" required class="w-full bg-slate-900/40 border border-slate-800 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-slate-400 focus:outline-none">
+    <!-- Teacher Form -->
+    <section class="p-6">
+      <h2 class="text-xl mb-4">Add New Teacher</h2>
+      <form id="teacherForm" class="space-y-4 bg-gray-800 p-4 rounded shadow-neon">
+        <input id="teacherName" type="text" placeholder="Teacher Name"
+          class="w-full p-2 rounded bg-black border border-cyan-400 text-cyan-300" required>
+        <input id="teacherSubject" type="text" placeholder="Subject"
+          class="w-full p-2 rounded bg-black border border-cyan-400 text-cyan-300" required>
+        <button type="submit" class="px-4 py-2 bg-green-600 hover:bg-green-700 rounded">Add Teacher</button>
+      </form>
+    </section>
 
-                <button type="submit" class="w-full bg-gradient-to-r from-emerald-600 to-emerald-400 text-white font-mono font-bold text-xs tracking-widest py-4 rounded-xl transition duration-500 uppercase cursor-pointer">🚀 Commit Faculty Entry</button>
-            </form>
-            <div id="teacherFeedback" class="hidden mt-4 p-3 rounded-xl text-center text-xs font-mono"></div>
-        </div>
-    </main>
+    <!-- Teacher Table -->
+    <section class="p-6">
+      <h2 class="text-xl mb-4">Teacher Records</h2>
+      <table class="w-full border border-cyan-400 text-cyan-300">
+        <thead class="bg-gray-900">
+          <tr>
+            <th class="p-2 border border-cyan-400">ID</th>
+            <th class="p-2 border border-cyan-400">Name</th>
+            <th class="p-2 border border-cyan-400">Subject</th>
+            <th class="p-2 border border-cyan-400">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="teacherTable" class="bg-gray-800">
+          <!-- Rows injected by teachers.js -->
+        </tbody>
+      </table>
+    </section>
 
-    <script src="assets/js/teacher.js"></script>
+    <!-- Scripts -->
+    <script type="module" src="../assets/js/teachers.js"></script>
+    <!-- Include footer -->
+    <%- include('../components/footer') %>
 </body>
+
 </html>

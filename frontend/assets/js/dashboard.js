@@ -1,3 +1,6 @@
+// frontend/assets/js/dashboard.js
+import apiRequest from "./api.js";
+
 const socket = io("http://127.0.0.1:8000");
 
 // Chart instances
@@ -5,76 +8,98 @@ let feeStatusChart, studentDensityChart, teacherChart, attendanceChart, gradesCh
 
 // Initialize charts
 function initCharts(initialData) {
-  // Finance (Invoices)
-  const ctxFee = document.getElementById("feeStatusChart").getContext("2d");
-  feeStatusChart = new Chart(ctxFee, {
+  feeStatusChart = createFeeChart(initialData.finance_analytics);
+  studentDensityChart = createStudentChart(initialData.class_analytics);
+  teacherChart = createTeacherChart(initialData.teacher_analytics);
+  attendanceChart = createAttendanceChart(initialData.attendance_analytics);
+  gradesChart = createGradesChart(initialData.grades_analytics);
+}
+
+// Chart creation functions
+function createFeeChart(data) {
+  return new Chart(document.getElementById("feeStatusChart"), {
     type: "doughnut",
     data: {
       labels: ["Paid", "Unpaid", "Partially Paid"],
       datasets: [{
-        data: initialData.finance_analytics.map(f => f.invoice_count),
-        backgroundColor: ["#22c55e", "#ef4444", "#eab308"]
+        data: data.map(f => f.invoice_count),
+        backgroundColor: ["#22c55e", "#ef4444", "#eab308"],
+        borderColor: "#0f0",
+        borderWidth: 2
       }]
-    }
-  });
-
-  // Students per class
-  const ctxStudent = document.getElementById("studentDensityChart").getContext("2d");
-  studentDensityChart = new Chart(ctxStudent, {
-    type: "bar",
-    data: {
-      labels: initialData.class_analytics.map(c => c.class_name),
-      datasets: [{
-        label: "Students per Class",
-        data: initialData.class_analytics.map(c => c.total_students),
-        backgroundColor: "#6366f1"
-      }]
-    }
-  });
-
-  // Teachers per subject
-  const ctxTeacher = document.getElementById("teacherChart").getContext("2d");
-  teacherChart = new Chart(ctxTeacher, {
-    type: "pie",
-    data: {
-      labels: initialData.teacher_analytics.map(t => t.subject),
-      datasets: [{
-        data: initialData.teacher_analytics.map(t => t.count),
-        backgroundColor: ["#06b6d4", "#f97316", "#8b5cf6"]
-      }]
-    }
-  });
-
-  // Attendance (last 7 days)
-  const ctxAttendance = document.getElementById("attendanceChart").getContext("2d");
-  attendanceChart = new Chart(ctxAttendance, {
-    type: "line",
-    data: {
-      labels: initialData.attendance_analytics.map(a => a.date),
-      datasets: [{
-        label: "Present",
-        data: initialData.attendance_analytics.map(a => a.present),
-        borderColor: "#10b981"
-      }]
-    }
-  });
-
-  // Grades per subject
-  const ctxGrades = document.getElementById("gradesChart").getContext("2d");
-  gradesChart = new Chart(ctxGrades, {
-    type: "bar",
-    data: {
-      labels: initialData.grades_analytics.map(g => g.subject),
-      datasets: [{
-        label: "Average Grades",
-        data: initialData.grades_analytics.map(g => g.average),
-        backgroundColor: "#f59e0b"
-      }]
-    }
+    },
+    options: { plugins: { legend: { labels: { color: "#0ff" } } } }
   });
 }
 
-// Fetch initial analytics (JWT protected)
+function createStudentChart(data) {
+  return new Chart(document.getElementById("studentDensityChart"), {
+    type: "bar",
+    data: {
+      labels: data.map(c => c.class_name),
+      datasets: [{
+        label: "Students per Class",
+        data: data.map(c => c.total_students),
+        backgroundColor: "#6366f1",
+        borderColor: "#f0f",
+        borderWidth: 2
+      }]
+    },
+    options: { scales: { x: { ticks: { color: "#0ff" } }, y: { ticks: { color: "#0ff" } } } }
+  });
+}
+
+function createTeacherChart(data) {
+  return new Chart(document.getElementById("teacherChart"), {
+    type: "pie",
+    data: {
+      labels: data.map(t => t.subject),
+      datasets: [{
+        data: data.map(t => t.count),
+        backgroundColor: ["#06b6d4", "#f97316", "#8b5cf6"],
+        borderColor: "#ff0",
+        borderWidth: 2
+      }]
+    },
+    options: { plugins: { legend: { labels: { color: "#0ff" } } } }
+  });
+}
+
+function createAttendanceChart(data) {
+  return new Chart(document.getElementById("attendanceChart"), {
+    type: "line",
+    data: {
+      labels: data.map(a => a.date),
+      datasets: [{
+        label: "Present",
+        data: data.map(a => a.present),
+        borderColor: "#10b981",
+        backgroundColor: "#0ff",
+        tension: 0.3
+      }]
+    },
+    options: { scales: { x: { ticks: { color: "#0ff" } }, y: { ticks: { color: "#0ff" } } } }
+  });
+}
+
+function createGradesChart(data) {
+  return new Chart(document.getElementById("gradesChart"), {
+    type: "bar",
+    data: {
+      labels: data.map(g => g.subject),
+      datasets: [{
+        label: "Average Grades",
+        data: data.map(g => g.average),
+        backgroundColor: "#f59e0b",
+        borderColor: "#0ff",
+        borderWidth: 2
+      }]
+    },
+    options: { scales: { x: { ticks: { color: "#0ff" } }, y: { ticks: { color: "#0ff" } } } }
+  });
+}
+
+// Fetch initial analytics
 async function loadAnalytics() {
   const json = await apiRequest("/analytics");
   if (json.status === "success") {
@@ -83,35 +108,26 @@ async function loadAnalytics() {
 }
 
 // Listen for realtime updates
-socket.on("dashboard_update", payload => {
-  console.log("Realtime update:", payload);
-
-  if (payload.finance_analytics) {
-    feeStatusChart.data.datasets[0].data = payload.finance_analytics.map(f => f.invoice_count);
+socket.on("dashboard_update", async () => {
+  const json = await apiRequest("/analytics");
+  if (json.status === "success") {
+    feeStatusChart.data.datasets[0].data = json.data.finance_analytics.map(f => f.invoice_count);
     feeStatusChart.update();
-  }
 
-  if (payload.class_analytics) {
-    studentDensityChart.data.labels = payload.class_analytics.map(c => c.class_name);
-    studentDensityChart.data.datasets[0].data = payload.class_analytics.map(c => c.total_students);
+    studentDensityChart.data.labels = json.data.class_analytics.map(c => c.class_name);
+    studentDensityChart.data.datasets[0].data = json.data.class_analytics.map(c => c.total_students);
     studentDensityChart.update();
-  }
 
-  if (payload.teacher_analytics) {
-    teacherChart.data.labels = payload.teacher_analytics.map(t => t.subject);
-    teacherChart.data.datasets[0].data = payload.teacher_analytics.map(t => t.count);
+    teacherChart.data.labels = json.data.teacher_analytics.map(t => t.subject);
+    teacherChart.data.datasets[0].data = json.data.teacher_analytics.map(t => t.count);
     teacherChart.update();
-  }
 
-  if (payload.attendance_analytics) {
-    attendanceChart.data.labels = payload.attendance_analytics.map(a => a.date);
-    attendanceChart.data.datasets[0].data = payload.attendance_analytics.map(a => a.present);
+    attendanceChart.data.labels = json.data.attendance_analytics.map(a => a.date);
+    attendanceChart.data.datasets[0].data = json.data.attendance_analytics.map(a => a.present);
     attendanceChart.update();
-  }
 
-  if (payload.grades_analytics) {
-    gradesChart.data.labels = payload.grades_analytics.map(g => g.subject);
-    gradesChart.data.datasets[0].data = payload.grades_analytics.map(g => g.average);
+    gradesChart.data.labels = json.data.grades_analytics.map(g => g.subject);
+    gradesChart.data.datasets[0].data = json.data.grades_analytics.map(g => g.average);
     gradesChart.update();
   }
 });

@@ -1,65 +1,110 @@
-const express = require("express");
-const router = express.Router();
-const pool = require("../config/db");
-const emitDashboardUpdate = require("../utils/realtime");
+// frontend/assets/js/students.js
+import apiRequest from "./api.js";
 
-// Create student
-router.post("/", async (req, res) => {
-  const { first_name, last_name, email, contact_number, class_id } = req.body;
-  try {
-    const result = await pool.query(
-      `INSERT INTO STUDENTS (first_name, last_name, email, contact_number, class_id)
-       VALUES ($1, $2, $3, $4, $5) RETURNING *;`,
-      [first_name, last_name, email, contact_number, class_id]
+document.addEventListener("DOMContentLoaded", () => {
+  const studentForm = document.getElementById("studentForm");
+  const studentTable = document.getElementById("studentTable");
+
+  // Load all students initially
+  loadStudents();
+
+  // Handle form submission (Create student)
+  if (studentForm) {
+    studentForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const name = document.getElementById("studentName").value.trim();
+      const age = document.getElementById("studentAge").value.trim();
+      const classId = document.getElementById("studentClass").value.trim();
+
+      try {
+        await apiRequest("/students", "POST", {
+          name,
+          age,
+          class_id: classId
+        });
+
+        alert("✅ Student added successfully!");
+        studentForm.reset();
+        loadStudents();
+      } catch (err) {
+        alert("❌ Error adding student: " + err.message);
+      }
+    });
+  }
+
+  // Load students into table
+  async function loadStudents() {
+    try {
+      const res = await apiRequest("/students");
+      if (res.status === "success") {
+        renderTable(res.data);
+      }
+    } catch (err) {
+      console.error("❌ Error loading students:", err.message);
+    }
+  }
+
+  // Render table rows
+  function renderTable(students) {
+    if (!studentTable) return;
+    studentTable.innerHTML = "";
+
+    students.forEach((s) => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${s.student_id}</td>
+        <td>${s.name}</td>
+        <td>${s.age}</td>
+        <td>${s.class_id}</td>
+        <td>
+          <button class="edit-btn" data-id="${s.student_id}">✏️ Edit</button>
+          <button class="delete-btn" data-id="${s.student_id}">🗑️ Delete</button>
+        </td>
+      `;
+      studentTable.appendChild(row);
+    });
+
+    // Attach edit/delete handlers
+    document.querySelectorAll(".edit-btn").forEach((btn) =>
+      btn.addEventListener("click", () => editStudent(btn.dataset.id))
     );
-    res.json({ status: "success", data: result.rows[0] });
-
-    // Push update to dashboard
-    emitDashboardUpdate(req.io);
-  } catch (err) {
-    res.status(500).json({ status: "error", message: err.message });
-  }
-});
-
-// Read all students
-router.get("/", async (req, res) => {
-  try {
-    const result = await pool.query(`SELECT * FROM STUDENTS;`);
-    res.json({ status: "success", data: result.rows });
-  } catch (err) {
-    res.status(500).json({ status: "error", message: err.message });
-  }
-});
-
-// Update student
-router.put("/:id", async (req, res) => {
-  const { id } = req.params;
-  const { first_name, last_name, email, contact_number, class_id } = req.body;
-  try {
-    await pool.query(
-      `UPDATE STUDENTS 
-       SET first_name=$1, last_name=$2, email=$3, contact_number=$4, class_id=$5 
-       WHERE student_id=$6;`,
-      [first_name, last_name, email, contact_number, class_id, id]
+    document.querySelectorAll(".delete-btn").forEach((btn) =>
+      btn.addEventListener("click", () => deleteStudent(btn.dataset.id))
     );
-    res.json({ status: "success" });
+  }
 
-    emitDashboardUpdate(req.io);
-  } catch (err) {
-    res.status(500).json({ status: "error", message: err.message });
+  // Edit student
+  async function editStudent(id) {
+    const newName = prompt("Enter new name:");
+    const newAge = prompt("Enter new age:");
+    const newClassId = prompt("Enter new class ID:");
+
+    if (!newName || !newAge || !newClassId) return;
+
+    try {
+      await apiRequest(`/students/${id}`, "PUT", {
+        name: newName,
+        age: newAge,
+        class_id: newClassId
+      });
+      alert("✅ Student updated!");
+      loadStudents();
+    } catch (err) {
+      alert("❌ Error updating student: " + err.message);
+    }
+  }
+
+  // Delete student
+  async function deleteStudent(id) {
+    if (!confirm("Are you sure you want to delete this student?")) return;
+
+    try {
+      await apiRequest(`/students/${id}`, "DELETE");
+      alert("✅ Student deleted!");
+      loadStudents();
+    } catch (err) {
+      alert("❌ Error deleting student: " + err.message);
+    }
   }
 });
-
-// Delete student
-router.delete("/:id", async (req, res) => {
-  try {
-    await pool.query(`DELETE FROM STUDENTS WHERE student_id=$1;`, [req.params.id]);
-    res.json({ status: "success" });
-
-    emitDashboardUpdate(req.io);
-  } catch (err) {
-    res.status(500).json({ status: "error", message: err.message });
-  }
-});
-
-module.exports = router;
