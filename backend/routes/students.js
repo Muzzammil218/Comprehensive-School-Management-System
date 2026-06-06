@@ -1,7 +1,6 @@
 // backend/routes/students.js
 import express from "express";
-import pool from "../db.js";
-import { broadcastUpdate } from "../index.js"; // import broadcast utility
+import pool from "../config/db.js"; // Placed inside config/db.js as discovered
 
 const router = express.Router();
 
@@ -38,8 +37,10 @@ router.post("/", async (req, res, next) => {
     );
     res.status(201).json({ status: "success", data: result.rows[0] });
 
-    // 🔄 Trigger real-time update
-    broadcastUpdate("students");
+    // 🔄 Fetch io from express instance and trigger real-time update
+    const io = req.app.get("io");
+    io.emit("dataUpdated", { type: "students" });
+
   } catch (err) {
     next(err);
   }
@@ -58,8 +59,10 @@ router.put("/:id", async (req, res, next) => {
     }
     res.json({ status: "success", data: result.rows[0] });
 
-    // 🔄 Trigger real-time update
-    broadcastUpdate("students");
+    // 🔄 Fetch io from express instance and trigger real-time update
+    const io = req.app.get("io");
+    io.emit("dataUpdated", { type: "students" });
+
   } catch (err) {
     next(err);
   }
@@ -74,8 +77,10 @@ router.delete("/:id", async (req, res, next) => {
     }
     res.json({ status: "success", message: "Student deleted" });
 
-    // 🔄 Trigger real-time update
-    broadcastUpdate("students");
+    // 🔄 Fetch io from express instance and trigger real-time update
+    const io = req.app.get("io");
+    io.emit("dataUpdated", { type: "students" });
+
   } catch (err) {
     next(err);
   }

@@ -1,7 +1,6 @@
 // backend/routes/teachers.js
 import express from "express";
-import pool from "../db.js";
-import { broadcastUpdate } from "../index.js"; // import broadcast utility
+import pool from "../config/db.js";
 
 const router = express.Router();
 
@@ -36,10 +35,14 @@ router.post("/", async (req, res, next) => {
       "INSERT INTO teachers (first_name, last_name, email, phone, hire_date, subject) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
       [first_name, last_name, email, phone, hire_date, subject]
     );
+
+    // 🌟 1. FETCH IO FROM THE APP & EMIT DIRECTLY RIGHT HERE (Before sending the response)
+    const io = req.app.get("io");
+    io.emit("dataUpdated", { type: "teachers" });
+
+    // 🌟 2. MOVE THIS TO THE BOTTOM (Good practice to send the HTTP response after your background tasks)
     res.status(201).json({ status: "success", data: result.rows[0] });
 
-    // 🔄 Trigger real-time update
-    broadcastUpdate("teachers");
   } catch (err) {
     next(err);
   }

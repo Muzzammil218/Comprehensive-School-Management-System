@@ -1,5 +1,6 @@
 // backend/config/db.js
-const { Pool } = require("pg");
+import pg from "pg";
+const { Pool } = pg;
 
 const pool = new Pool({
   user: process.env.DB_USER,
@@ -11,12 +12,13 @@ const pool = new Pool({
 });
 
 pool.on("connect", () => {
-  console.log("✅ Connected to PostgreSQL");
+  console.log("✅ Connected to PostgreSQL Database");
 });
 
 pool.on("error", (err) => {
-  console.error("❌ Unexpected error on idle client", err);
+  console.error("❌ Unexpected error on idle database client", err);
   process.exit(-1);
 });
 
-module.exports = pool;
+// ✅ THIS IS THE IMPORTANT CHANGE: Use ES Module export instead of module.exports
+export default pool;
