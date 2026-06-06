@@ -1,7 +1,7 @@
 // backend/routes/classes.js
 import express from "express";
 import pool from "../db.js";
-import { broadcastUpdate } from "../index.js"; // import broadcast utility
+import { broadcastUpdate } from "../index.mjs"; // import broadcast utility
 
 const router = express.Router();
 
