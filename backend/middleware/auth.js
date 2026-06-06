@@ -1,26 +1,33 @@
 // backend/middleware/auth.js
-const jwt = require("jsonwebtoken");
+import jwt from "jsonwebtoken";
 
-function authMiddleware(req, res, next) {
+// ✅ Verify JWT and attach user to request
+export function authenticateToken(req, res, next) {
   const authHeader = req.headers["authorization"];
-  if (!authHeader) {
-    return res.status(403).json({ status: "error", message: "No token provided" });
+  const token = authHeader && authHeader.split(" ")[1];
+
+  if (!token) {
+    return res.status(401).json({ status: "error", message: "No token provided" });
   }
 
-  const token = authHeader.split(" ")[1];
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
-
-    // Example: restrict to admins only
-    if (decoded.role !== "admin") {
-      return res.status(403).json({ status: "error", message: "Forbidden" });
-    }
-
+    req.user = decoded; // attach decoded payload (id, username, role)
     next();
   } catch (err) {
-    return res.status(401).json({ status: "error", message: "Invalid token" });
+    return res.status(403).json({ status: "error", message: "Invalid or expired token" });
   }
 }
 
-module.exports = authMiddleware;
+// ✅ Optional: restrict by role directly
+export function authorizeRole(requiredRole) {
+  return (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json({ status: "error", message: "Unauthorized" });
+    }
+    if (req.user.role !== requiredRole) {
+      return res.status(403).json({ status: "error", message: "Forbidden: Insufficient permissions" });
+    }
+    next();
+  };
+}

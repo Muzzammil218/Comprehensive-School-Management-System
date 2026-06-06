@@ -1,56 +1,67 @@
-const express = require("express");
-const router = express.Router();
-const pool = require("../config/db");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
+// backend/routes/auth.js
+import express from "express";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import pool from "../db.js";
 
-// Register new admin
-router.post("/register", async (req, res) => {
-  const { username, password } = req.body;
+const router = express.Router();
+
+// Register new user
+router.post("/register", async (req, res, next) => {
   try {
+    const { username, password, role } = req.body;
+
+    // Validate role
+    const validRoles = ["admin", "teacher", "student"];
+    if (!validRoles.includes(role)) {
+      return res.status(400).json({ status: "error", message: "Invalid role" });
+    }
+
+    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Insert user into DB
     const result = await pool.query(
-      `INSERT INTO ADMINS (username, password) VALUES ($1, $2) RETURNING *;`,
-      [username, hashedPassword]
+      "INSERT INTO users (username, password, role) VALUES ($1, $2, $3) RETURNING *",
+      [username, hashedPassword, role]
     );
 
-    res.json({ status: "success", data: result.rows[0] });
+    res.status(201).json({ status: "success", data: result.rows[0] });
   } catch (err) {
-    res.status(500).json({ status: "error", message: err.message });
+    next(err);
   }
 });
 
-// Login admin
-router.post("/login", async (req, res) => {
-  const { username, password } = req.body;
+// Login user
+router.post("/login", async (req, res, next) => {
   try {
-    const result = await pool.query(
-      `SELECT * FROM ADMINS WHERE username=$1;`,
-      [username]
-    );
+    const { username, password } = req.body;
 
+    // Find user
+    const result = await pool.query("SELECT * FROM users WHERE username=$1", [username]);
     if (result.rows.length === 0) {
       return res.status(401).json({ status: "error", message: "Invalid credentials" });
     }
 
-    const admin = result.rows[0];
-    const match = await bcrypt.compare(password, admin.password);
+    const user = result.rows[0];
 
-    if (!match) {
+    // Compare password
+    const validPassword = await bcrypt.compare(password, user.password);
+    if (!validPassword) {
       return res.status(401).json({ status: "error", message: "Invalid credentials" });
     }
 
+    // Generate JWT
     const token = jwt.sign(
-      { id: admin.admin_id, role: "admin" },
+      { id: user.user_id, username: user.username, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
 
     res.json({ status: "success", token });
   } catch (err) {
-    res.status(500).json({ status: "error", message: err.message });
+    next(err);
   }
 });
 
-module.exports = router;
+export default router;
