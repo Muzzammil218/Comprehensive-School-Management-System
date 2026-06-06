@@ -22,7 +22,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (res.status === "success") {
           alert("✅ Registration successful! You can now log in.");
           registerForm.reset();
-          window.location.href = "login.html";
+          // ✅ Fixed redirect
+          window.location.href = "/login";
         }
       } catch (err) {
         alert("❌ Registration failed: " + err.message);
@@ -35,7 +36,8 @@ document.addEventListener("DOMContentLoaded", () => {
     logoutBtn.addEventListener("click", () => {
       localStorage.removeItem("token");
       alert("👋 Logged out successfully!");
-      window.location.href = "login.html";
+      // ✅ Fixed redirect
+      window.location.href = "/login";
     });
   }
 });

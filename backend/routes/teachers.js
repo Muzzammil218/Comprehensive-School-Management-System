@@ -1,61 +1,84 @@
-const express = require("express");
-const router = express.Router();
-const pool = require("../config/db");
-const emitDashboardUpdate = require("../utils/realtime");
+// backend/routes/teachers.js
+import express from "express";
+import pool from "../db.js";
+import { broadcastUpdate } from "../index.js"; // import broadcast utility
 
-// Create teacher
-router.post("/", async (req, res) => {
-  const { first_name, last_name, email, phone, hire_date, subject } = req.body;
+const router = express.Router();
+
+// Get all teachers
+router.get("/", async (req, res, next) => {
   try {
-    const result = await pool.query(
-      `INSERT INTO TEACHERS (first_name, last_name, email, phone, hire_date, subject)
-       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *;`,
-      [first_name, last_name, email, phone, hire_date, subject]
-    );
-    res.json({ status: "success", data: result.rows[0] });
-    emitDashboardUpdate(req.io);
+    const result = await pool.query("SELECT * FROM teachers ORDER BY teacher_id");
+    res.json({ status: "success", data: result.rows });
   } catch (err) {
-    res.status(500).json({ status: "error", message: err.message });
+    next(err);
   }
 });
 
-// Read all teachers
-router.get("/", async (req, res) => {
+// Get single teacher
+router.get("/:id", async (req, res, next) => {
   try {
-    const result = await pool.query(`SELECT * FROM TEACHERS;`);
-    res.json({ status: "success", data: result.rows });
+    const result = await pool.query("SELECT * FROM teachers WHERE teacher_id = $1", [req.params.id]);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Teacher not found" });
+    }
+    res.json({ status: "success", data: result.rows[0] });
   } catch (err) {
-    res.status(500).json({ status: "error", message: err.message });
+    next(err);
+  }
+});
+
+// Create teacher
+router.post("/", async (req, res, next) => {
+  try {
+    const { first_name, last_name, email, phone, hire_date, subject } = req.body;
+    const result = await pool.query(
+      "INSERT INTO teachers (first_name, last_name, email, phone, hire_date, subject) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
+      [first_name, last_name, email, phone, hire_date, subject]
+    );
+    res.status(201).json({ status: "success", data: result.rows[0] });
+
+    // 🔄 Trigger real-time update
+    broadcastUpdate("teachers");
+  } catch (err) {
+    next(err);
   }
 });
 
 // Update teacher
-router.put("/:id", async (req, res) => {
-  const { id } = req.params;
-  const { first_name, last_name, email, phone, hire_date, subject } = req.body;
+router.put("/:id", async (req, res, next) => {
   try {
-    await pool.query(
-      `UPDATE TEACHERS 
-       SET first_name=$1, last_name=$2, email=$3, phone=$4, hire_date=$5, subject=$6 
-       WHERE teacher_id=$7;`,
-      [first_name, last_name, email, phone, hire_date, subject, id]
+    const { first_name, last_name, email, phone, hire_date, subject } = req.body;
+    const result = await pool.query(
+      "UPDATE teachers SET first_name=$1, last_name=$2, email=$3, phone=$4, hire_date=$5, subject=$6 WHERE teacher_id=$7 RETURNING *",
+      [first_name, last_name, email, phone, hire_date, subject, req.params.id]
     );
-    res.json({ status: "success" });
-    emitDashboardUpdate(req.io);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Teacher not found" });
+    }
+    res.json({ status: "success", data: result.rows[0] });
+
+    // 🔄 Trigger real-time update
+    broadcastUpdate("teachers");
   } catch (err) {
-    res.status(500).json({ status: "error", message: err.message });
+    next(err);
   }
 });
 
 // Delete teacher
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", async (req, res, next) => {
   try {
-    await pool.query(`DELETE FROM TEACHERS WHERE teacher_id=$1;`, [req.params.id]);
-    res.json({ status: "success" });
-    emitDashboardUpdate(req.io);
+    const result = await pool.query("DELETE FROM teachers WHERE teacher_id=$1 RETURNING *", [req.params.id]);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Teacher not found" });
+    }
+    res.json({ status: "success", message: "Teacher deleted" });
+
+    // 🔄 Trigger real-time update
+    broadcastUpdate("teachers");
   } catch (err) {
-    res.status(500).json({ status: "error", message: err.message });
+    next(err);
   }
 });
 
-module.exports = router;
+export default router;

@@ -1,61 +1,84 @@
-const express = require("express");
-const router = express.Router();
-const pool = require("../config/db");
-const emitDashboardUpdate = require("../utils/realtime");
+// backend/routes/invoices.js
+import express from "express";
+import pool from "../db.js";
+import { broadcastUpdate } from "../index.js"; // import broadcast utility
 
-// Create invoice
-router.post("/", async (req, res) => {
-  const { student_id, amount, status, due_date } = req.body;
+const router = express.Router();
+
+// Get all invoices
+router.get("/", async (req, res, next) => {
   try {
-    const result = await pool.query(
-      `INSERT INTO INVOICES (student_id, amount, status, due_date)
-       VALUES ($1, $2, $3, $4) RETURNING *;`,
-      [student_id, amount, status, due_date]
-    );
-    res.json({ status: "success", data: result.rows[0] });
-    emitDashboardUpdate(req.io);
+    const result = await pool.query("SELECT * FROM invoices ORDER BY invoice_id");
+    res.json({ status: "success", data: result.rows });
   } catch (err) {
-    res.status(500).json({ status: "error", message: err.message });
+    next(err);
   }
 });
 
-// Read all invoices
-router.get("/", async (req, res) => {
+// Get single invoice
+router.get("/:id", async (req, res, next) => {
   try {
-    const result = await pool.query(`SELECT * FROM INVOICES;`);
-    res.json({ status: "success", data: result.rows });
+    const result = await pool.query("SELECT * FROM invoices WHERE invoice_id = $1", [req.params.id]);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Invoice not found" });
+    }
+    res.json({ status: "success", data: result.rows[0] });
   } catch (err) {
-    res.status(500).json({ status: "error", message: err.message });
+    next(err);
+  }
+});
+
+// Create invoice
+router.post("/", async (req, res, next) => {
+  try {
+    const { student_id, amount, status } = req.body;
+    const result = await pool.query(
+      "INSERT INTO invoices (student_id, amount, status) VALUES ($1, $2, $3) RETURNING *",
+      [student_id, amount, status]
+    );
+    res.status(201).json({ status: "success", data: result.rows[0] });
+
+    // 🔄 Trigger real-time update
+    broadcastUpdate("invoices");
+  } catch (err) {
+    next(err);
   }
 });
 
 // Update invoice
-router.put("/:id", async (req, res) => {
-  const { id } = req.params;
-  const { student_id, amount, status, due_date } = req.body;
+router.put("/:id", async (req, res, next) => {
   try {
-    await pool.query(
-      `UPDATE INVOICES 
-       SET student_id=$1, amount=$2, status=$3, due_date=$4 
-       WHERE invoice_id=$5;`,
-      [student_id, amount, status, due_date, id]
+    const { student_id, amount, status } = req.body;
+    const result = await pool.query(
+      "UPDATE invoices SET student_id=$1, amount=$2, status=$3 WHERE invoice_id=$4 RETURNING *",
+      [student_id, amount, status, req.params.id]
     );
-    res.json({ status: "success" });
-    emitDashboardUpdate(req.io);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Invoice not found" });
+    }
+    res.json({ status: "success", data: result.rows[0] });
+
+    // 🔄 Trigger real-time update
+    broadcastUpdate("invoices");
   } catch (err) {
-    res.status(500).json({ status: "error", message: err.message });
+    next(err);
   }
 });
 
 // Delete invoice
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", async (req, res, next) => {
   try {
-    await pool.query(`DELETE FROM INVOICES WHERE invoice_id=$1;`, [req.params.id]);
-    res.json({ status: "success" });
-    emitDashboardUpdate(req.io);
+    const result = await pool.query("DELETE FROM invoices WHERE invoice_id=$1 RETURNING *", [req.params.id]);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Invoice not found" });
+    }
+    res.json({ status: "success", message: "Invoice deleted" });
+
+    // 🔄 Trigger real-time update
+    broadcastUpdate("invoices");
   } catch (err) {
-    res.status(500).json({ status: "error", message: err.message });
+    next(err);
   }
 });
 
-module.exports = router;
+export default router;

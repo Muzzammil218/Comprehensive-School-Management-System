@@ -7,13 +7,7 @@
 
   <!-- TailwindCSS for cyberpunk styling -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="/css/global.css">
-
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-  <!-- Socket.IO client -->
-  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <link rel="stylesheet" href="/assets/css/global.css">
 </head>
 
 <body class="bg-black text-cyan-300 font-mono">
@@ -22,46 +16,34 @@
 
   <!-- Header -->
   <header class="p-4 bg-gray-900 border-b border-cyan-400 flex justify-between items-center">
-    <h1 class="text-2xl neon-text">⚡ Cyberpunk School Dashboard</h1>
-    <button id="logoutBtn" class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded">Logout</button>
+    <h1 class="text-2xl neon-text">📊 Admin Dashboard</h1>
+    <a href="/logout" id="logoutBtn" class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded">Logout</a>
   </header>
 
-  <!-- Dashboard Grid -->
-  <main class="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    <!-- Finance -->
-    <section class="bg-gray-800 p-4 rounded shadow-neon">
-      <h2 class="text-xl mb-2">Fee Status</h2>
-      <canvas id="feeStatusChart" class="neon-glow"></canvas>
-    </section>
+  <!-- Analytics Section -->
+  <section class="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+    <!-- Teachers by Subject -->
+    <div class="bg-gray-900 p-4 rounded shadow-neon">
+      <h2 class="text-xl mb-2">Teachers by Subject</h2>
+      <canvas id="teachersChart"></canvas>
+    </div>
 
-    <!-- Students per class -->
-    <section class="bg-gray-800 p-4 rounded shadow-neon">
-      <h2 class="text-xl mb-2">Students per Class</h2>
-      <canvas id="studentDensityChart" class="neon-glow"></canvas>
-    </section>
+    <!-- Attendance Summary -->
+    <div class="bg-gray-900 p-4 rounded shadow-neon">
+      <h2 class="text-xl mb-2">Attendance Summary</h2>
+      <canvas id="attendanceChart"></canvas>
+    </div>
 
-    <!-- Teachers per subject -->
-    <section class="bg-gray-800 p-4 rounded shadow-neon">
-      <h2 class="text-xl mb-2">Teachers per Subject</h2>
-      <canvas id="teacherChart" class="neon-glow"></canvas>
-    </section>
+    <!-- Grades by Class -->
+    <div class="bg-gray-900 p-4 rounded shadow-neon">
+      <h2 class="text-xl mb-2">Grades by Class</h2>
+      <canvas id="gradesChart"></canvas>
+    </div>
+  </section>
 
-    <!-- Attendance -->
-    <section class="bg-gray-800 p-4 rounded shadow-neon col-span-2">
-      <h2 class="text-xl mb-2">Attendance (Last 7 Days)</h2>
-      <canvas id="attendanceChart" class="neon-glow"></canvas>
-    </section>
-
-    <!-- Grades -->
-    <section class="bg-gray-800 p-4 rounded shadow-neon col-span-2">
-      <h2 class="text-xl mb-2">Average Grades</h2>
-      <canvas id="gradesChart" class="neon-glow"></canvas>
-    </section>
-  </main>
-
-  <!-- Scripts -->
+  <!-- Chart.js + Dashboard Script -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script type="module" src="/assets/js/dashboard.js"></script>
-  <script type="module" src="/assets/js/auth.js"></script>
 
   <!-- Shared footer -->
   <%- include("components/footer") %>

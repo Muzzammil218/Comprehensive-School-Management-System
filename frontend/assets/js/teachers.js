@@ -1,105 +1,74 @@
-// frontend/assets/js/teachers.js
-import apiRequest from "./api.js";
+// backend/routes/teachers.js
+import express from "express";
+import pool from "../db.js";
 
-document.addEventListener("DOMContentLoaded", () => {
-  const teacherForm = document.getElementById("teacherForm");
-  const teacherTable = document.getElementById("teacherTable");
+const router = express.Router();
 
-  // Load all teachers initially
-  loadTeachers();
-
-  // Handle form submission (Create teacher)
-  if (teacherForm) {
-    teacherForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-
-      const name = document.getElementById("teacherName").value.trim();
-      const subject = document.getElementById("teacherSubject").value.trim();
-
-      try {
-        await apiRequest("/teachers", "POST", {
-          name,
-          subject
-        });
-
-        alert("✅ Teacher added successfully!");
-        teacherForm.reset();
-        loadTeachers();
-      } catch (err) {
-        alert("❌ Error adding teacher: " + err.message);
-      }
-    });
-  }
-
-  // Load teachers into table
-  async function loadTeachers() {
-    try {
-      const res = await apiRequest("/teachers");
-      if (res.status === "success") {
-        renderTable(res.data);
-      }
-    } catch (err) {
-      console.error("❌ Error loading teachers:", err.message);
-    }
-  }
-
-  // Render table rows
-  function renderTable(teachers) {
-    if (!teacherTable) return;
-    teacherTable.innerHTML = "";
-
-    teachers.forEach((t) => {
-      const row = document.createElement("tr");
-      row.innerHTML = `
-        <td>${t.teacher_id}</td>
-        <td>${t.name}</td>
-        <td>${t.subject}</td>
-        <td>
-          <button class="edit-btn" data-id="${t.teacher_id}">✏️ Edit</button>
-          <button class="delete-btn" data-id="${t.teacher_id}">🗑️ Delete</button>
-        </td>
-      `;
-      teacherTable.appendChild(row);
-    });
-
-    // Attach edit/delete handlers
-    document.querySelectorAll(".edit-btn").forEach((btn) =>
-      btn.addEventListener("click", () => editTeacher(btn.dataset.id))
-    );
-    document.querySelectorAll(".delete-btn").forEach((btn) =>
-      btn.addEventListener("click", () => deleteTeacher(btn.dataset.id))
-    );
-  }
-
-  // Edit teacher
-  async function editTeacher(id) {
-    const newName = prompt("Enter new name:");
-    const newSubject = prompt("Enter new subject:");
-
-    if (!newName || !newSubject) return;
-
-    try {
-      await apiRequest(`/teachers/${id}`, "PUT", {
-        name: newName,
-        subject: newSubject
-      });
-      alert("✅ Teacher updated!");
-      loadTeachers();
-    } catch (err) {
-      alert("❌ Error updating teacher: " + err.message);
-    }
-  }
-
-  // Delete teacher
-  async function deleteTeacher(id) {
-    if (!confirm("Are you sure you want to delete this teacher?")) return;
-
-    try {
-      await apiRequest(`/teachers/${id}`, "DELETE");
-      alert("✅ Teacher deleted!");
-      loadTeachers();
-    } catch (err) {
-      alert("❌ Error deleting teacher: " + err.message);
-    }
+// Get all teachers
+router.get("/", async (req, res, next) => {
+  try {
+    const result = await pool.query("SELECT * FROM teachers");
+    res.json({ status: "success", data: result.rows });
+  } catch (err) {
+    next(err); // ✅ pass error to global handler
   }
 });
+
+// Get single teacher
+router.get("/:id", async (req, res, next) => {
+  try {
+    const result = await pool.query("SELECT * FROM teachers WHERE teacher_id = $1", [req.params.id]);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Teacher not found" });
+    }
+    res.json({ status: "success", data: result.rows[0] });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Create teacher
+router.post("/", async (req, res, next) => {
+  try {
+    const { first_name, last_name, email, phone, hire_date, subject } = req.body;
+    const result = await pool.query(
+      "INSERT INTO teachers (first_name, last_name, email, phone, hire_date, subject) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
+      [first_name, last_name, email, phone, hire_date, subject]
+    );
+    res.status(201).json({ status: "success", data: result.rows[0] });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Update teacher
+router.put("/:id", async (req, res, next) => {
+  try {
+    const { first_name, last_name, email, phone, hire_date, subject } = req.body;
+    const result = await pool.query(
+      "UPDATE teachers SET first_name=$1, last_name=$2, email=$3, phone=$4, hire_date=$5, subject=$6 WHERE teacher_id=$7 RETURNING *",
+      [first_name, last_name, email, phone, hire_date, subject, req.params.id]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Teacher not found" });
+    }
+    res.json({ status: "success", data: result.rows[0] });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Delete teacher
+router.delete("/:id", async (req, res, next) => {
+  try {
+    const result = await pool.query("DELETE FROM teachers WHERE teacher_id=$1 RETURNING *", [req.params.id]);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Teacher not found" });
+    }
+    res.json({ status: "success", message: "Teacher deleted" });
+  } catch (err) {
+    next(err);
+  }
+});
+
+export default router;

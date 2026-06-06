@@ -3,12 +3,12 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>Manage Fees</title>
+  <title>Manage Students</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <!-- TailwindCSS for cyberpunk styling -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="/assets/css/global.css">
+  <link rel="stylesheet" href="/css/global.css">
 </head>
 
 <body class="bg-black text-cyan-300 font-mono">
@@ -17,54 +17,56 @@
 
     <!-- Header -->
     <header class="p-4 bg-gray-900 border-b border-cyan-400 flex justify-between items-center">
-      <h1 class="text-2xl neon-text">💰 Fee Management</h1>
+      <h1 class="text-2xl neon-text">👨‍🎓 Student Management</h1>
       <a href="/dashboard" class="px-4 py-2 bg-cyan-600 hover:bg-cyan-700 rounded">Back to Dashboard</a>
     </header>
 
-    <!-- Fee Form -->
+    <!-- Student Form -->
     <section class="p-6">
-      <h2 class="text-xl mb-4">Add New Fee Record</h2>
-      <form id="feeForm" class="space-y-4 bg-gray-800 p-4 rounded shadow-neon">
-        <input id="feeStudent" type="text" placeholder="Student ID"
+      <h2 class="text-xl mb-4">Add New Student</h2>
+      <form id="studentForm" class="space-y-4 bg-gray-800 p-4 rounded shadow-neon">
+        <input id="studentFirstName" type="text" placeholder="First Name"
           class="w-full p-2 rounded bg-black border border-cyan-400 text-cyan-300" required>
-        <input id="feeAmount" type="number" placeholder="Amount"
+        <input id="studentLastName" type="text" placeholder="Last Name"
           class="w-full p-2 rounded bg-black border border-cyan-400 text-cyan-300" required>
-        <select id="feeStatus" class="w-full p-2 rounded bg-black border border-cyan-400 text-cyan-300" required>
-          <option value="Paid">Paid</option>
-          <option value="Unpaid">Unpaid</option>
-          <option value="Partially Paid">Partially Paid</option>
-        </select>
-        <button type="submit" class="px-4 py-2 bg-green-600 hover:bg-green-700 rounded">Add Fee</button>
+        <input id="studentEmail" type="email" placeholder="Email"
+          class="w-full p-2 rounded bg-black border border-cyan-400 text-cyan-300" required>
+        <input id="studentContact" type="text" placeholder="Contact Number"
+          class="w-full p-2 rounded bg-black border border-cyan-400 text-cyan-300" required>
+        <input id="studentClass" type="number" placeholder="Class ID"
+          class="w-full p-2 rounded bg-black border border-cyan-400 text-cyan-300" required>
+        <button type="submit" class="px-4 py-2 bg-green-600 hover:bg-green-700 rounded">Add Student</button>
       </form>
+
     </section>
 
-    <!-- Fee Table -->
+    <!-- Student Table -->
     <section class="p-6">
-      <h2 class="text-xl mb-4">Fee Records</h2>
-      <table id="feeTable" class="w-full border border-cyan-400 text-cyan-300">
+      <h2 class="text-xl mb-4">Student Records</h2>
+      <table class="w-full border border-cyan-400 text-cyan-300">
         <thead class="bg-gray-900">
           <tr>
-            <th class="p-2 border border-cyan-400">Invoice ID</th>
-            <th class="p-2 border border-cyan-400">Student ID</th>
-            <th class="p-2 border border-cyan-400">Amount</th>
-            <th class="p-2 border border-cyan-400">Status</th>
+            <th class="p-2 border border-cyan-400">ID</th>
+            <th class="p-2 border border-cyan-400">Name</th>
+            <th class="p-2 border border-cyan-400">Age</th>
+            <th class="p-2 border border-cyan-400">Class ID</th>
             <th class="p-2 border border-cyan-400">Actions</th>
           </tr>
         </thead>
         <tbody class="bg-gray-800">
-          <% fees.forEach(fee=> { %>
+          <% students.forEach(student=> { %>
             <tr>
               <td class="p-2 border border-cyan-400">
-                <%= fee.invoice_id %>
+                <%= student.id %>
               </td>
               <td class="p-2 border border-cyan-400">
-                <%= fee.student_id %>
+                <%= student.name %>
               </td>
               <td class="p-2 border border-cyan-400">
-                <%= fee.amount %>
+                <%= student.age %>
               </td>
               <td class="p-2 border border-cyan-400">
-                <%= fee.status %>
+                <%= student.class_id %>
               </td>
               <td class="p-2 border border-cyan-400">
                 <button class="px-2 py-1 bg-yellow-600 hover:bg-yellow-700 rounded">Edit</button>
@@ -77,7 +79,7 @@
     </section>
 
     <!-- Scripts -->
-    <script type="module" src="/assets/js/fee.js"></script>
+    <script type="module" src="/assets/js/students.js"></script>
 
     <!-- Shared footer -->
     <%- include("components/footer") %>

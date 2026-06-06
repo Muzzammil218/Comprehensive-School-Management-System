@@ -17,7 +17,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (res.token) {
           localStorage.setItem("token", res.token);
           alert("✅ Login successful!");
-          window.location.href = "/dashboard.html"; // redirect to dashboard
+          // ✅ Fixed redirect
+          window.location.href = "/dashboard";
         }
       } catch (err) {
         alert("❌ Login failed: " + err.message);
